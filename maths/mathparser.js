@@ -13,9 +13,8 @@ var mathParser = (function() {
 				   'N','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
 	
 	let operators = ['+','-','*','/','^'];
-	let opFuncs = [];
 
-	let specials = ['(',')',',']; //To keep track of characters with explicitly-coded functions
+	let specials = ['(',')',',']; //To keep track of characters with explicitly-coded functionality
 
 	let functions = ['sin','cos','abs','max','min'];
 	let actions = [];
@@ -188,35 +187,7 @@ var mathParser = (function() {
 			useOperator(actionStack.pop());
 		}
 
-		return [valueStack, actionStack];
-	}
-
-	function tokensToPostfixNotation(valueStack) {
-		let actionStack = [];
-		let postfixStruct = [];
-
-		let len = valueStack.length;
-		for (let i = 0; i < len; i++) {
-			let tok = valueStack[i];
-			if (functions.includes(tok)) {
-				//Code if it's a function
-			} else if (operators.includes(tok)) {
-				
-			} else if (separators.includes(tok)) {
-				//Code if it's a separator
-			} else if (brackets.includes(tok)) {
-				//Code if it's a bracket
-			} else {
-				//Must be a literal or variable
-				postfixStruct.push(tok);
-			}
-		}
-		//Add remaining operators
-		for (let i = actionStack.length-1; i >= 0; i--) {
-			postfixStruct.push(actionStack.pop());
-		}
-
-		return postfixStruct;
+		return valueStack;
 	}
 
 	return {eval: evalExp};
