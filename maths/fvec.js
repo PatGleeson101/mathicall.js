@@ -75,7 +75,10 @@ var fVec = (function() {
 		return result;
 	}
 
-
+	function subVec2(vec1, vec2) {
+		return [vec1[0]-vec2[0],
+				vec1[1]-vec2[1]];
+	}
 
 	function subVec3(vec1, vec2) {
 		return [vec1[0]-vec2[0],
@@ -87,9 +90,9 @@ var fVec = (function() {
 	//Magnitude functions
 	function magVec(vec) {
 		let sum = 0;
-		let length
-		for (let i = 0; i < 3; i++) {
-			sum += vector[i]*vector[i];
+		let length = vec.length;
+		for (let i = 0; i < length; i++) {
+			sum += vec[i]*vec[i];
 		}
 		return Math.sqrt(sum);
 	}
@@ -102,15 +105,19 @@ var fVec = (function() {
 	//Scale functions
 	function scaleVecBy(vec, k) {
 		let order = vec.length;
-		let result = new Array(order).fill(0);
+		let result = [];
 		for (let i = 0; i < order; i++) {
-			result[i] = vec[i]*k;
+			result.push(vec[i]*k);
 		}
 		return result;
 	}
 
 	function scaleVecTo(vec, m) {
 		return scaleVecBy(vec, m/magVec(vec));
+	}
+
+	function normalize(vec) {
+		return scaleVecTo(vec,1);
 	}
 
 	function scaleVec3By(vec, k) {
@@ -140,6 +147,7 @@ var fVec = (function() {
 		sumVec3: sumVec3,
 		addVec3: addVec3,
 		subVec: subVec,
+		subVec2: subVec2,
 		subVec3: subVec3,
 		magVec: magVec,
 		magVec3: magVec3,
@@ -147,7 +155,8 @@ var fVec = (function() {
 		scaleVecTo: scaleVecTo,
 		scaleVec3By: scaleVec3By,
 		scaleVec3To: scaleVec3To,
-		angleBetweenVec: angleBetweenVec
+		angleBetweenVec: angleBetweenVec,
+		normalize: normalize
 	}
 }());
 
