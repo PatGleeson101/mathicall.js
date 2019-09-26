@@ -1,13 +1,15 @@
-/*MathicallJS item: pseudorandom.js
+/* MathicallJS module: rand.js
 Provides basic pseudorandom functions
 
 Dependencies:
-hashing.js
+hash.js
 */
 
-var pseudorandom = (function(){
-	//Load dependencies as local variables
-	const hsh = hashing; 
+var rand = (function(){
+	"use strict";
+
+	//Dependencies
+	const szudzikPair = hash.szudzikPair;
 
 	//Multiplicative congruential generator using Park-Miller constants
 	function lehmerLCG(seed) {
@@ -21,7 +23,7 @@ var pseudorandom = (function(){
 		return function(a,b) { //Must be nonnegative integer inputs (else breaks)
 			const LCG = lehmerLCG(seed); //Initialise 
 			LCG(); //'Throw out' initial value (initial value is predictable)
-			const count = hsh.szudzikPair(a,b); //Hash input pair to unique value
+			const count = szudzikPair(a,b); //Hash input pair to unique value
 			for (let i = 0; i < count-1; i++) { //Skip the next (count-1) LCG values
 				LCG();
 			}
@@ -29,6 +31,8 @@ var pseudorandom = (function(){
 		}
 	}
 
-	return {lehmerLCG: lehmerLCG,
-			biRand: biRand};
+	return {
+		lehmerLCG: lehmerLCG,
+		biRand: biRand
+	};
 }());

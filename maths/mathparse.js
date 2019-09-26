@@ -1,8 +1,10 @@
-/* MathicallJS item: mathparser.js
+/* MathicallJS module: mathparse.js
 A module to parse string maths expressions into usable forms
+
+Dependencies: None
 */
 
-var mathParser = (function() {
+var mathparse = (function() {
 	"use strict";
 
 	//Define and categorise recognised tokens (single characters or multiple letters)
@@ -190,5 +192,7 @@ var mathParser = (function() {
 		return valueStack;
 	}
 
-	return {eval: evalExp};
+	return {
+		eval: evalExp
+			};
 }());
