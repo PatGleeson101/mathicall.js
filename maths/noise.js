@@ -20,6 +20,8 @@ var noise = (function(){
 	//Dependencies
 	const biRand = rand.biRand;
 	const dotVec2 = vecf.dotVec2;
+	const normalize = vecf.normalize;
+	const magVec2 = vecf.magVec2;
 
 	//Perlin Noise implementations
 	class Perlin {
@@ -53,10 +55,10 @@ var noise = (function(){
 						 	  [0,-1],
 						 	  [1,0],
 						 	  [-1,0],
-						 	  vecf.normalize([1,1]),
-						 	  vecf.normalize([-1,-1]),
-						 	  vecf.normalize([1,-1]),
-						 	  vecf.normalize([-1,1])];
+						 	  normalize([1,1]),
+						 	  normalize([-1,-1]),
+						 	  normalize([1,-1]),
+						 	  normalize([-1,1])];
 
 			this.prand = biRand(this.s);
 		}
@@ -180,8 +182,8 @@ var noise = (function(){
 				//Semi-initialise first weight-quadruplet
 				row[0] = [null,
 						  null,
-						  vec.dotVec2( [localX, localY-stepSize], leftCol[0][0] ),
-					      vec.dotVec2( [localX-1, localY-stepSize], rightCol[0][0] )];
+						  dotVec2( [localX, localY-stepSize], leftCol[0][0] ),
+					      dotVec2( [localX-1, localY-stepSize], rightCol[0][0] )];
 
 				//Record initial localX
 				startX = localX;
@@ -323,7 +325,7 @@ var noise = (function(){
 					//Iterate over points and get distance
 					for (let q = 0; q < newPoints.length; q++) {
 						const p = newPoints[q];
-						const d = vec.magVec([p[0] - x, p[1] - y]);
+						const d = magVec2([p[0] - x, p[1] - y]);
 						for (let index = 0; index < distSort.length; index ++) {
 							if (d < distSort[index]) {
 								distSort.splice(index, 0, d);
@@ -382,7 +384,7 @@ var noise = (function(){
 						//Iterate over points and get distance
 						for (let q = 0; q < newPoints.length; q++) {
 							const p = newPoints[q];
-							const d = vec.magVec([p[0] - x, p[1] - y, p[2] - z]);
+							const d = magVec2([p[0] - x, p[1] - y, p[2] - z]);
 							for (let index = 0; index < distSort.length; index ++) {
 								if (d < distSort[index]) {
 									distSort.splice(index, 0, d);
