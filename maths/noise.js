@@ -7,6 +7,8 @@ Noise functions output in the range [0,1];
 Dependencies: 
 vecf.js
 rand.js (requires hash.js)
+pmath.js
+combi.js
 */
 
 //Noises to implement:
@@ -19,16 +21,44 @@ var noise = (function(){
 
 	//Dependencies
 	const biRand = rand.biRand;
+	const multiRand = rand.multiRand
 	const dotVec2 = vecf.dotVec2;
 	const normalize = vecf.normalize;
 	const magVec2 = vecf.magVec2;
+	const lerp = pmath.lerp;
+	const floor = Math.floor;
+	const permutations = combi.permutations;
+	const sqrt = Math.sqrt;
 
 	//Perlin Noise implementations
-	class Perlin {
+	class Perlin { //(Unfinished) Perlin noise in any number of dimensions
 		constructor(dimension, seed = Math.random()) {
 			//Set properties
 			this.dimension = dimension;
 			this.seed = seed;
+
+			this.initialiseGradients();
+			this.prand = multiRand(seed);
+		}
+
+		initialiseGradients() { //Generates vectors from center to each edge of 'this.dimension'al hypercube
+			//Initialise nonzero components of gradients
+			let componentLength = 1/sqrt(this.dimension)
+			let baseVectors = permutations([componentLength, -componentLength], this.dimension-1);
+
+			//Add a single 0 component wherever possible
+			this.gradients = [];
+			for (let i = 0; i < baseVectors.length; i++) {
+				const base = baseVectors[i];
+				for (let j = 0; j < this.dimension; j++) {
+					const copy = [...base];
+					copy.splice(j, 0 , 0);
+					this.gradients.push(copy);
+				}
+			}
+
+			//Record number of gradients
+			this.gradientCount = this.gradients.length;
 		}
 
 		fade(t) {
@@ -44,11 +74,25 @@ var noise = (function(){
 			if (coordinates.length !== this.dimension) {
 				throw this.dimension+"D Perlin value requires exactly "+this.dimension+" coordinates";
 			}
-			//Check that coordinates are numbers
+			
+			//Calculate & store cell's coordinates and local coordinates
+			let cellCoordinates = Array(this.dimension);
+			let localCoordinates = Array(this.dimension);
+			for (let i = 0; i < this.dimension; i++) {
+				let coord = coordinates[i];
+				let cellCoord = floor(coord);
+				cellCoordinates[i] = cellCoord;
+				localCoordinates[i] = coord - cellCoord;
+			}
+
+			//Determine gradient and influence value at each vertex of hypercube
+			const vertices = [];
+
+
 		}
 	}
 
-	class Perlin2D { //Defines a 2D Perlin noisespace, nonrepeating in the range 
+	class Perlin2D { //Defines a 2D Perlin noisespace, nonrepeating in a large range
 		constructor(seed) {
 			this.s = seed;
 			this.gradients = [[0,1],
@@ -59,6 +103,7 @@ var noise = (function(){
 						 	  normalize([-1,-1]),
 						 	  normalize([1,-1]),
 						 	  normalize([-1,1])];
+			this.gradientCount = 8;
 
 			this.prand = biRand(this.s);
 		}
@@ -71,23 +116,23 @@ var noise = (function(){
 			//Interpolate & return result
 			const xr = this.fade(localX); //Weighted xRatio
 			const yr = this.fade(localY); //Weighted yRatio
-			const w12 = w1 + (w2 - w1)*xr; //Linearly interpolate w1 & w2 (horizontally)
-			const w34 = w3 + (w4 - w3)*xr; //Linearly interpolate w3 & w4 (horizontally)
-			return (w12 + (w34-w12)*yr+1)/2; //Return (vertically) interpolated value, mapped to range [0,1]
+			const w12 = lerp(w1, w2, xr); //Linearly interpolate w1 & w2 (horizontally)
+			const w34 = lerp(w3, w4, xr); //Linearly interpolate w3 & w4 (horizontally)
+			return (lerp(w12, w34, yr)+1)/2; //Return (vertically) interpolated value, mapped to range [0,1]
 		}
 
 		value(x, y) {
 			//Determine cell coordinates
-			const x1 = Math.floor(x);
+			const x1 = floor(x);
 			const x2 = x1 + 1;
-			const y1 = Math.floor(y);
+			const y1 = floor(y);
 			const y2 = y1 + 1;
 
 			//Determine gradient vectors
-			const g1 = this.gradients[Math.floor(this.prand(x1, y1)*8)];
-			const g2 = this.gradients[Math.floor(this.prand(x2, y1)*8)];
-			const g3 = this.gradients[Math.floor(this.prand(x1, y2)*8)];
-			const g4 = this.gradients[Math.floor(this.prand(x2, y2)*8)];
+			const g1 = this.gradients[floor(this.prand(x1, y1)*this.gradientCount)];
+			const g2 = this.gradients[floor(this.prand(x2, y1)*this.gradientCount)];
+			const g3 = this.gradients[floor(this.prand(x1, y2)*this.gradientCount)];
+			const g4 = this.gradients[floor(this.prand(x2, y2)*this.gradientCount)];
 
 			//Determine position vectors
 			const localX = x - x1;
@@ -124,8 +169,8 @@ var noise = (function(){
 
 		grid(x, y, width, height, stepSize) { //Generates a grid of Perlin noise very efficiently
 			//Start & stop coordinates
-			const startCellX = Math.floor(x);
-			const startCellY = Math.floor(y);
+			const startCellX = floor(x);
+			const startCellY = floor(y);
 			const endX = x + width*stepSize;
 			const endY = y + height*stepSize;
 
@@ -138,7 +183,7 @@ var noise = (function(){
 			let newGradient = [null, null]; 
 			//Initialise rightCol (gets switched to leftCol at start of loop)
 			for (let j = rightCol.length-1; j >= 0; j--) { //Looping backwards just saves an extra cache
-				newGradient = this.gradients[Math.floor(this.prand(startCellX, startCellY+j)*8)]; //Generate & store gradient
+				newGradient = this.gradients[floor(this.prand(startCellX, startCellY+j)*8)]; //Generate & store gradient
 				rightCol[j] = [newGradient, newGradient[0]*stepSize, newGradient[1]*stepSize]; //Cache gradient and precalculated horizontal and vertical increment values
 			}
 
@@ -171,7 +216,7 @@ var noise = (function(){
 				leftCol = rightCol.slice(0); //Set leftCol to rightCol
 				//Re-generate rightCol
 				for (let j = rightCol.length-1; j >= 0; j--) { //Looping backwards just saves an extra cache
-					newGradient = this.gradients[Math.floor(this.prand(cellX+1, cellY+j)*8)]; //Generate & store gradient
+					newGradient = this.gradients[floor(this.prand(cellX+1, cellY+j)*8)]; //Generate & store gradient
 					rightCol[j] = [newGradient, newGradient[0]*stepSize, newGradient[1]*stepSize]; //Cache gradient and precalculated horizontal and vertical increment values
 				}
 
@@ -298,7 +343,7 @@ var noise = (function(){
 
 
 	//Worley Noise implementations
-	class Worley2D {
+	class Worley2D { //Requires optimisation
 		constructor(seed, density) {
 			this.s = seed;
 			this.d = density;
@@ -357,7 +402,7 @@ var noise = (function(){
 		}
 	}
 
-	class Worley3D {
+	class Worley3D { //Requires optimisation
 		constructor(seed, density) {
 			this.s = seed;
 			this.d = density;
