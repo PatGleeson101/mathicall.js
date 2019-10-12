@@ -22,12 +22,24 @@ var hash = (function(){
 	}
 
 	function bit26Pair(x, y) {
-		return x*67108864 | y; //Currently inaccurate
+		return x*67108864 + y; //Currently unsure if this is entirely unique
 	}
+
+	//Higher pair functions
+	function recursivePair(...ints) {
+		if (ints.length === 2) {
+			return szudzikPair(ints[0], ints[1]);
+		} else {
+			return szudzikPair(ints[0], recursivePair(...ints.slice(1)));
+		}
+	}
+
 
 	//Return public functions
 	return {
 		szudzikPair: szudzikPair,
-		bit16Pair: bit16Pair
+		bit16Pair: bit16Pair,
+		bit26Pair: bit26Pair,
+		recursivePair: recursivePair
 			};
 }());
