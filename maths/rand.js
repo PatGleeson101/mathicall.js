@@ -31,8 +31,21 @@ var rand = (function(){
 		}
 	}
 
+	function multiRand(seed) { //Functions similarly to biRand, but with a variable number of arguments
+		return function(...ints) {
+			const LCG = lehmerLCG(seed);
+			LCG();
+			const count = recursivePair(...ints);
+			for (let i = 0; i < count-1; i++) {
+				LCG();
+			}
+			return LCG(); //Return next LCG value
+		}
+	}
+
 	return {
 		lehmerLCG: lehmerLCG,
-		biRand: biRand
-	};
+		biRand: biRand,
+		multiRand: multiRand
+			};
 }());
