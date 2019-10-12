@@ -12,7 +12,7 @@ var benchmark = (function(){
 		let sum = 0;
 		for (let i = 0; i < count; i++) {
 			time = Date.now();
-			f(...inputs);
+			f(...inputs); //ISSUE: SPREAD TAKES ADDITIONAL TIME
 			sum += Date.now()-time;
 		}
 		return sum/count; //Returns average runtime
