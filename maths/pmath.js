@@ -20,7 +20,11 @@ trunc
 
 Already super fast in built-in Math module:
 abs
-hypot (even matches cases where number of arguments known beforehand and explicitly coded for)
+hypot (even rivals cases where number of arguments known beforehand and explicitly coded for)
+
+To add:
+gcd
+lcm
 */
 
 var pmath = (function(){
@@ -53,7 +57,7 @@ var pmath = (function(){
 	}
 
 	function lerp(x, y, weight) {
-		return (1 - weight) * x + y;
+		return x + (y - x)*weight;
 	}
 
 	return {
