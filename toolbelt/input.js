@@ -39,6 +39,7 @@ var input = (function(){
 				}
 
 			};
+
 			window.onkeyup = function(e) {
 				let code = e.code;
 				if (inputHandler.keyData[code] !== undefined) {
