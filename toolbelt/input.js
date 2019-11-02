@@ -26,30 +26,32 @@ var input = (function(){
 			this.keyUpHandler = placeHolderFunc;
 
 			let inputHandler = this;
-			window.onkeydown = function(e) {let code = e.code;
-											if (inputHandler.keyData[code] !== undefined) {
-												inputHandler.keysDown[code].down = true;
-											} else {
-												inputHandler.keyData[code] = {tracking: false, down: true};
-											}
+			window.onkeydown = function(e) {
+				let code = e.code;
+				if (inputHandler.keyData[code] !== undefined) {
+					inputHandler.keysDown[code].down = true;
+				} else {
+					inputHandler.keyData[code] = {tracking: false, down: true};
+				}
 
-											if (inputHandler.keyData[code].tracking) {
-												inputHandler.keyDownHandler(e);
-											}
+				if (inputHandler.keyData[code].tracking) {
+					inputHandler.keyDownHandler(e);
+				}
 
-										};
-			window.onkeyup = function(e) {let code = e.code;
-										  if (inputHandler.keyData[code] !== undefined) {
-												inputHandler.keysDown[code].down = false;
-										  } else {
-												inputHandler.keyData[code] = {tracking: false, down: false};
-										  }
+			};
+			window.onkeyup = function(e) {
+				let code = e.code;
+				if (inputHandler.keyData[code] !== undefined) {
+					inputHandler.keysDown[code].down = false;
+				} else {
+					inputHandler.keyData[code] = {tracking: false, down: false};
+				}
 
-										  if (inputHandler.keyData[code].tracking) {
-												inputHandler.keyUpHandler(e);
-										  }
+				if (inputHandler.keyData[code].tracking) {
+					inputHandler.keyUpHandler(e);
+				}
 
-										};
+			};
 			//window.onkeypress = function(e) {};
 
 			window.onmousedown = function() {
