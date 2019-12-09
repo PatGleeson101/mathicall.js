@@ -5,19 +5,27 @@ Notes:
 An m x n matrix is represented by an array of length m containing subarrays each of length n
 
 Dependencies:
-vecf.js
+None
+
+To implement:
+- class-like version of matrix built on modified array 
+  (for compatibility with rest of functions)
+- generator functions to create specific matrix multipliers/other operations (for efficiency in known situations)
+- matrix joining functions
+- rref
+- use [m, n] size arrays instead of inputs (m,n)?
 */
 
 var matrixf = (function(){
 	"use strict";
 
 	//Dependencies
-	//const dotVec = vecf.dotVec;
 	const max = Math.max;
 	const ceil = Math.ceil;
 	const floor = Math.floor;
 
 	//Matrix creation
+	//To modify this function: make 'values' list input which represents uniform value if its length is 1, or list ov values otherwise
 	function matrix(m, n, value = 0) {
 		let result = new Array(m);
 		for (let i = 0; i < m; i++) {
@@ -48,7 +56,7 @@ var matrixf = (function(){
 	}
 
 	//Scalar multiplication
-	function scale(matrix, k) {
+	function scale(matrix, k) { //This function modifies the original matrix
 		const m = matrix.length;
 		const n = matrix[0].length;
 		for (let i = 0; i < m; i++) {
@@ -74,7 +82,19 @@ var matrixf = (function(){
 		return result;
 	}
 
-	//Matrix multiplication
+	//Matrices from vectors
+	function rowVector(vector) {
+		return [[...vector]]; //Clones vector array and wraps inside outer array
+	}
+
+	function columnVector(vector) {
+		const m = vector.length;
+		let result = new Array(m);
+		for (let i = 0; i < m; i++) {
+			result[i] = [vector[i]];
+		}
+		return result;
+	}
 
 	//Transpose
 	function transposed(matrix) {
@@ -92,9 +112,62 @@ var matrixf = (function(){
 		return result;
 	}
 
+	//Nonscalar multiplication
+	
+	//TO implement: multT & multV (plus variants)
+
+	function mult(mtx1, mtx2) {
+		const m = mtx1.length;
+		const n = mtx2[0].length;
+		const m2 = mtx2.length;
+		const n1 = mtx1[0].length;
+		let result = new Array(m);
+		for (let i = 0; i < m; i++) {
+			const newRow = new Array(n);
+			newRow.fill(0);
+			const oldRow = mtx1[i];
+			for (let j = 0; j < n; j++) {
+				for (let k = 0; k < n; k++) {
+					newRow[j] += oldRow[k] * mtx2[k][j];
+				}
+			}
+			result[i] = newRow;
+		}
+
+		return result;
+	}
+
 	//Sizing
 	function size(matrix) {
 		return [matrix.length, matrix[0].length];
+	}
+
+	function resized(matrix, M, N) {
+		const m = matrix.length;
+		const n = matrix[0].length;
+		let result = new Array(M);
+
+		const minRows = Math.min(M, m);
+		const minColumns = Math.min(N, n);
+		for (let i = 0; i < minRows; i++) {
+			const oldRow = matrix[i];
+			let newRow = new Array(N);
+			for (let j = 0; j < minColumns; j++) {
+				newRow[j] = oldRow[j];
+			}
+			for (let j = minColumns; j < N; j++) {
+				newRow[j] = 0;
+			}
+			result[i] = newRow;
+		}
+
+		for (let i = minRows; i < M; i++) {
+			let newRow = new Array(N);
+			newRow.fill(0);
+			result[i] = newRow;
+		}
+
+		return result;
 	}
 
 	//Displaying matrices
@@ -113,7 +186,7 @@ var matrixf = (function(){
 		}
 
 		//Create display string
-		let result = "[";
+		let result = "[ ";
 
 		//Iterate over matrix and add entries to display
 		for (let i = 0; i < m; i++) {
@@ -123,9 +196,8 @@ var matrixf = (function(){
 				const buffer = columnWidths[j] - value.length;
 				result += " ".repeat(ceil(buffer/2))+value+" ".repeat(floor(buffer/2)+1);
 			}
-			if (i != m-1) {
-				result += "\n";
-				result += " ";
+			if (i != m-1) { 
+				result += " \n ";
 			}
 		}
 		result += "]";
@@ -142,7 +214,11 @@ var matrixf = (function(){
 		scale: scale,
 		scaled: scaled,
 		transposed: transposed,
+		mult: mult,
 		size: size,
-		toDisplayString: toDisplayString
+		toDisplayString: toDisplayString,
+		rowVector: rowVector,
+		columnVector: columnVector,
+		resized: resized
 			};
 }());
