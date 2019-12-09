@@ -7,18 +7,31 @@ Dependencies: None
 var benchmark = (function(){
 	"use strict";
 
-	function bench(count, f, ...inputs) {
-		let time;
-		let sum = 0;
-		for (let i = 0; i < count; i++) {
-			time = Date.now();
-			f(...inputs); //ISSUE: SPREAD TAKES ADDITIONAL TIME
-			sum += Date.now()-time;
+	function createBench(func, inputCount) {
+		//Generate input strings
+		let inputDeclaration = "";
+		let inputString = "";
+		for (let i = 0; i < inputCount; i++) {
+			inputDeclaration += "let v"+i+"=inputs["+i+"]";
+			inputString += "v"+i+",";
 		}
-		return sum/count; //Returns average runtime
+		if (inputCount > 0) {
+			inputString = inputString.slice(0,-1);
+		}
+
+		//Define function
+		const funcString = `function(count, inputs){`+ inputDeclaration+ `;
+			let time = Date.now();
+			for (let i = 0; i < count; i++) {
+				func(`+ inputString +`);
+			}
+			return (Date.now()-time)/count;}`;
+
+		//Create function
+		return Function("func", "return " + funcString)(func);
 	}
 
 	return {
-		bench: bench
+		createBench: createBench
 			};
 }());
