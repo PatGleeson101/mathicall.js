@@ -1,5 +1,5 @@
 # MathicallJS
-A pure-javascript library for mathematics and graphics.
+A javascript maths library.
 
 Note that MathicallJS is under the MIT license (see LICENSE for details).
 
