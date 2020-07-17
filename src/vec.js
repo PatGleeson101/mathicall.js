@@ -6,7 +6,7 @@ Dependencies: std
 var vec = (function() {
 	"use strict";
 
-	//Dependencies
+	//Cache function dependencies
 	const sqrt = Math.sqrt;
 	const acos = Math.acos;
 	const hypot = Math.hypot;
@@ -15,8 +15,8 @@ var vec = (function() {
 	//Dot product
 	function dot(vec1, vec2) {
 		let result = 0;
-		let len = vec1.length;
-		for (let i = 0; i  < len; i++) {
+		const dimension = vec1.length;
+		for (let i = 0; i < dimension; i++) {
 			result += vec1[i] * vec2[i];
 		}
 		return result;
@@ -32,20 +32,21 @@ var vec = (function() {
 
 	//Cross product
 	function cross3(vec1, vec2) {
-		return [vec1[1] * vec2[2] - vec1[2] * vec2[1], 
-				vec1[2] * vec2[0] - vec1[0] * vec2[2],
-				vec1[0] * vec2[1] - vec1[1] * vec2[0]];
+		const result = new Float64Array(3);
+		result[0] = vec1[1] * vec2[2] - vec1[2] * vec2[1];
+		result[1] = vec1[2] * vec2[0] - vec1[0] * vec2[2];
+		result[2] = vec1[0] * vec2[1] - vec1[1] * vec2[0];
+		return result;
 	}
 
-	//Sum functions
+	//Addition
 	function sum(...vecs) {
-		let length = vecs.length;
-		let order = vecs[0].length;
-		let result = Array(order).fill(0);
-		let vec;
-		for (let i = 0; i < length; i++) {
-			vec = vecs[i];
-			for (let j = 0; j < order; j++) {
+		const count = vecs.length;
+		const dimension = vecs[0].length;
+		const result = new Float64Array(dimension);
+		for (let i = 0; i < count; i++) {
+			const vec = vecs[i];
+			for (let j = 0; j < dimension; j++) {
 				result[j] += vec[j];
 			}
 		}
@@ -53,11 +54,10 @@ var vec = (function() {
 	}
 
 	function sum2(...vecs) {
-		let result = [0, 0];
-		let length = vecs.length;
-		let vec;
-		for (let i = 0; i < length; i++) {
-			vec = vecs[i];
+		const result = new Float64Array(2);
+		const count = vecs.length;
+		for (let i = 0; i < count; i++) {
+			const vec = vecs[i];
 			result[0] += vec[0];
 			result[1] += vec[1];
 		}
@@ -65,11 +65,10 @@ var vec = (function() {
 	}
 
 	function sum3(...vecs) {
-		let result = [0, 0, 0];
-		let length = vecs.length;
-		let vec;
-		for (let i = 0; i < length; i++) {
-			vec = vecs[i];
+		const result = new Float64Array(3);
+		const count = vecs.length;
+		for (let i = 0; i < count; i++) {
+			const vec = vecs[i];
 			result[0] += vec[0];
 			result[1] += vec[1];
 			result[2] += vec[2];
@@ -77,36 +76,52 @@ var vec = (function() {
 		return result;
 	}
 
+	function add(vec1, vec2) {
+		const dimension = vec1.length;
+		const result = new Float64Array(dimension);
+		for (let i = 0; i < dimension; i++) {
+			result[i] = vec1[i] + vec2[i];
+		}
+	}
+
 	function add2(vec1, vec2) {
-		return [vec1[0] + vec2[0],
-				vec1[1] + vec2[1]];
+		const result = new Float64Array(2);
+		result[0] = vec1[0] + vec2[0];
+		result[1] = vec1[1] + vec2[1];
+		return result;
 	}
 
 	function add3(vec1, vec2) {
-		return [vec1[0] + vec2[0],
-				vec1[1] + vec2[1],
-				vec1[2] + vec2[2]];
+		const result = new Float64Array(3);
+		result[0] = vec1[0] + vec2[0];
+		result[1] = vec1[1] + vec2[1];
+		result[2] = vec1[2] + vec2[2];
+		return result;
 	}
 
 	//Subtraction
 	function sub(vec1, vec2) {
-		let order = vec1.length
-		let result = Array(order);
-		for (let i = 0; i < order; i++) {
+		const dimension = vec1.length
+		const result = new Float64Array(dimension);
+		for (let i = 0; i < dimension; i++) {
 			result[i] = vec1[i] - vec2[i];
 		}
 		return result;
 	}
 
 	function sub2(vec1, vec2) {
-		return [vec1[0] - vec2[0],
-				vec1[1] - vec2[1]];
+		const result = new Float64Array(2);
+		result[0] = vec1[0] - vec2[0];
+		result[1] = vec1[1] - vec2[1];
+		return result;
 	}
 
 	function sub3(vec1, vec2) {
-		return [vec1[0] - vec2[0],
-				vec1[1] - vec2[1],
-				vec1[2] - vec2[2]];
+		const result = new Float64Array(3);
+		result[0] = vec1[0] - vec2[0];
+		result[1] = vec1[1] - vec2[1];
+		result[2] = vec1[2] - vec2[2];
+		return result;
 	}
 
 	//Magnitude
@@ -122,62 +137,91 @@ var vec = (function() {
 		return hypot(vec[0], vec[1], vec[2]);
 	}
 
-
 	//Scaling
-	function smult(vec, k) {
-		let order = vec.length;
-		let result = [];
-		for (let i = 0; i < order; i++) {
-			result.push(vec[i]*k);
+	function scale(vec, k) {
+		const dimension = vec.length;
+		const result = new Float64Array(dimension);
+		for (let i = 0; i < dimension; i++) {
+			result[i] = vec[i] * k;
 		}
 		return result;
 	}
 
-	function smult2(vec, k) {
-		return [vec[0] * k, vec[1] * k];
+	function scale2(vec, k) {
+		const result = new Float64Array(2);
+		result[0] = vec[0] * k;
+		result[1] = vec[1] * k;
+		return result;
 	}
 
-	function smult3(vec, k) {
-		return [vec[0] * k, vec[1] * k, vec[2] * k];
+	function scale3(vec, k) {
+		const result = new Float64Array(3);
+		result[0] = vec[0] * k;
+		result[1] = vec[1] * k;
+		result[2] = vec[2] * k;
+		return result;
 	}
 
-	function toMag(vec, m) {
-		return smult(vec, m/magVec(vec));
+	function scaleTo(vec, m) {
+		return scale(vec, m / mag(vec));
 	}
 
-	function toMag2(vec, m) {
-		return smult2(vec, m/magVec3(vec));
+	function scaleTo2(vec, m) {
+		return scale2(vec, m / mag2(vec));
 	}
 
-	function toMag3(vec, m) {
-		return smult3(vec, m/magVec3(vec));
+	function scaleTo3(vec, m) {
+		return scale3(vec, m / mag3(vec));
 	}
 
-	//Std equivalents
-	function fractv(vec) {
-		order = vec.length;
-		let result = Array(order);
-		for (let i = 0; i < order; i++) {
-			result[i] = fract(vec[i])
+	function normalize(vec) {
+		return scaleTo(vec, 1);
+	}
+
+	function normalize2(vec) {
+		return scaleTo2(vec, 1);
+	}
+
+	function normalize3(vec) {
+		return scaleTo3(vec, 1);
+	}
+
+	//Angles & rotations
+	function angle(vec1, vec2) {
+		return acos(dot(vec1, vec2) / (mag(vec1) * mag(vec2)));
+	}
+
+	function angle2(vec1, vec2) {
+		return acos(dot2(vec1, vec2) / (mag2(vec1) * mag2(vec2)));
+	}
+
+	function angle3(vec1, vec2) {
+		return acos(dot3(vec1, vec2) / (mag3(vec1) * mag3(vec2)));
+	}
+
+	//Other component-wise operations
+	function vfract(vec) { //Name has 'v' to differentiate from fract
+		const dimension = vec.length;
+		const result = new Float64Array(dimension);
+		for (let i = 0; i < dimension; i++) {
+			result[i] = fract(vec[i]);
 		}
 		return result;
 	}
 
 	function fract2(vec) {
-		return [fract(vec[0]), fract(vec[1])];
+		const result = new Float64Array(2);
+		result[0] = fract(vec[0]);
+		result[1] = fract(vec[1]);
+		return result;
 	}
 
 	function fract3(vec) {
-		return [fract(vec[0]), fract(vec[1]), fract(vec[2])];
-	}
-
-	function normalized(vec) {
-		return toMag(vec, 1);
-	}
-
-	//Angles & rotations
-	function innerAngle(vec1, vec2) {
-		return acos(dot(vec1, vec2)/(mag(vec1) * mag(vec2)));
+		const result = new Float64Array(3);
+		result[0] = fract(vec[0]);
+		result[1] = fract(vec[1]);
+		result[2] = fract(vec[2]);
+		return result;
 	}
 
 	//Return all public functions
@@ -189,6 +233,7 @@ var vec = (function() {
 		sum: sum,
 		sum2: sum2,
 		sum3: sum3,
+		add: add,
 		add2: add2,
 		add3: add3,
 		sub: sub,
@@ -197,16 +242,20 @@ var vec = (function() {
 		mag: mag,
 		mag2: mag2,
 		mag3: mag3,
-		smult: smult,
-		smult2: smult2,
-		smult3: smult3,
-		toMag: toMag,
-		toMag2: toMag2,
-		toMag3: toMag3,
-		fract: fractv,
+		scale: scale,
+		scale2: scale2,
+		scale3: scale3,
+		scaleTo: scaleTo,
+		scaleTo2: scaleTo2,
+		scaleTo3: scaleTo3,
+		fract: vfract,
 		fract2: fract2,
 		fract3: fract3,
-		normalized: normalized,
-		innerAngle: innerAngle,
-			};
+		normalize: normalize,
+		normalize2: normalize2,
+		normalize3: normalize3,
+		angle: angle,
+		angle2: angle2,
+		angle3: angle3,
+	};
 }());

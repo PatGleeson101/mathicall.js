@@ -1,6 +1,6 @@
 /* MathicallJS module: noise.js
 
-Dependencies: vec, rand, std, hash
+Dependencies: std, vec, rand
 */
 
 var noise = (function(){
@@ -10,16 +10,21 @@ var noise = (function(){
 	const dot2 = vec.dot2;
 	const sub2 = vec.sub2;
 	const add2 = vec.add2;
-	const smult2 = vec.smult2;
+	const scale2 = vec.scale2;
 	const lerp = std.lerp;
 	const floor = Math.floor;
 	const ceil = Math.ceil;
 	const sqrt = Math.sqrt;
-	const vec2to1 = hash.vec2to1;
+	const vec2to1 = rand.fromVec2;
 	const cos = Math.cos;
 	const sin = Math.sin;
 	const PI = Math.PI;
 	const round = Math.round;
+
+	//Constants
+	const VAL = 0; //Code for 'value'
+	const DER = 1; //Code for 'derivative'
+	const ALL = 2; //Code for 'all'
 
 	//Perlin noise
 	function smootherstep(t) {
@@ -40,7 +45,7 @@ var noise = (function(){
 			const c1 = lerp(c10, c11, wgtY);
 			return 0.5 * (1 + lerp(c0, c1, wgtX)/range); //Return value
 		}
-		const value = function(x, y, mode = 'val') {
+		const value = function(x, y, mode = VAL) {
 			//Cell coordinates
 			const x0 = floor(x);
 			const y0 = floor(y);
@@ -59,7 +64,7 @@ var noise = (function(){
 			const c01 = dot2(g01, [locX, locY - 1]);
 			const c10 = dot2(g10, [locX - 1, locY]);
 			const c11 = dot2(g11, [locX - 1, locY - 1]);
-			if (mode === 'val') { //Value only
+			if (mode === VAL) { //Value only
 				return p2lerp(c00, c01, c10, c11, locX, locY)
 			} else { //Calculate derivative
 				const wgtX = smootherstep(locX); //Weighted x
@@ -68,13 +73,13 @@ var noise = (function(){
 				const c1 = lerp(c10, c11, wgtY);
 				const delWX = 30 * locX * locX * (locX * (locX - 2) + 1);
 				const delWY = 30 * locY * locY * (locY * (locY - 2) + 1);
-				const delC0 = add2(add2(g00, smult2(sub2(g10, g00), delWX)), [delWX * (c10 - c00), 0]);
-				const delC1 = add2(add2(g01, smult2(sub2(g11, g01), delWX)), [delWX * (c11 - c01), 0]);
-				let deriv = add2(add2(delC0, smult2(sub2(delC1, delC0), delWY)), [0, delWY * (c1 - c0)]);
-				deriv = smult(deriv, range);
-				if (mode === 'deriv') { //Return derivative
+				const delC0 = add2(add2(g00, scale2(sub2(g10, g00), delWX)), [delWX * (c10 - c00), 0]);
+				const delC1 = add2(add2(g01, scale2(sub2(g11, g01), delWX)), [delWX * (c11 - c01), 0]);
+				let deriv = add2(add2(delC0, scale2(sub2(delC1, delC0), delWY)), [0, delWY * (c1 - c0)]);
+				deriv = scale2(deriv, range);
+				if (mode === DER) { //Return derivative
 					return deriv;
-				} else if (mode === 'all') { //Return both value and derivative
+				} else if (mode === ALL) { //Return both value and derivative
 					const val = 0.5 * (1 + lerp(c0, c1, wgtX)/range);
 					return {val: val, deriv: deriv};
 				}
