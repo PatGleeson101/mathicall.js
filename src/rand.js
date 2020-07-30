@@ -1,6 +1,6 @@
 /* MathicallJS module: rand.js
 
-Dependencies: std
+Dependencies: std, vec
 */
 
 var rand = (function(){
@@ -86,15 +86,15 @@ var rand = (function(){
 		console.warn('rand: crypto functions unavailable');
 	}
 
-	//Vector hashing
-	function fromFloat(p) {
+	//Random hashing hashing
+	function floatfloat(p) {
 		p = fract(p * 0.1031);
 		p *= p + 33.33;
 		p *= p + p;
 		return fract(p);
 	}
 
-	function fromVec2(vec) {
+	function vec2float(vec) {
 		const pX = fract(vec[0] * 0.1031);
 		const pY = fract(vec[1] * 0.1031);
 		const offset = dot3([pX, pY, pX], [pY + 33.33, pX + 33.33, pX + 33.33]);
@@ -105,7 +105,7 @@ var rand = (function(){
 		MCG: MCG,
 		iMCG: iMCG,
 		cryptoUint32: cryptoUint32,
-		fromFloat: fromFloat,
-		fromVec2: fromVec2
+		floatfloat: floatfloat,
+		vec2float: vec2float
 			};
 }());

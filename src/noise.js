@@ -15,7 +15,7 @@ var noise = (function(){
 	const floor = Math.floor;
 	const ceil = Math.ceil;
 	const sqrt = Math.sqrt;
-	const vec2to1 = rand.fromVec2;
+	const vec2float = rand.vec2float;
 	const cos = Math.cos;
 	const sin = Math.sin;
 	const PI = Math.PI;
@@ -32,7 +32,7 @@ var noise = (function(){
 	}
 
 	function grad2(x, y) {
-		const theta = 2 * PI * vec2to1([x, y]);
+		const theta = 2 * PI * vec2float([x, y]);
 		return [cos(theta), sin(theta)];
 	}
 

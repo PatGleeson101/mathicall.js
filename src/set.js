@@ -61,14 +61,15 @@ var set = (function(){
 	function count(set, value, sorted = UNS) {
 		const len = set.length;
 		let result = 0;
-		if ((sorted === UNS)||(len < 64/*CHOOSE THIS PROPERLY*/)) { //Unsorted or length small; search entire array
-			for (let i = 0; i < len; i++) {
+		for (let i = 0; i < len; i++) {
 				if (set[i] === value) {result += 1;}
-			}
-		} else {//Sorted; use binary search
-			/*WIP*/
 		}
 		return result;
+		/*
+		if ((sorted === UNS)||(len < 64/*CHOOSE THIS PROPERLY//)) { //Unsorted or length small; search entire array
+		} else {//Sorted; use binary search
+			//WIP
+		}*/
 	}
 
 	function min(set) { //No 'sorted' parameter as min of sorted is trivial
