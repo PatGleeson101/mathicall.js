@@ -2,10 +2,14 @@
 
 MathicallJS is a javascript library that unites different areas of mathematics under a single high-performance API.
 
-[Usage](#usage) --- [Features](#features) --- [Documentation](#documentation) --- [Licence](#licence) --- [About](#about)
+[Usage](#usage) &mdash;
+[Features](#features) &mdash;
+[Documentation](#documentation) &mdash;
+[Licence](#licence) &mdash;
+[About](#about)
 
 ## Usage
-The MathicallJS library is currently available as both a static script (`mathicall.js`) and an ES6 module (`mathicall.mjs`), both of which can be found in the `/build` directory alongside their minified (`.min`) versions. To make use of MathicallJS, download the appropriate file to a convenient location (e.g. your project directory) and load it according to one of the examples below. MathicallJS is not currently available as an `npm` package.
+The MathicallJS library is currently available as both a static script (`mathicall.js`) and an ES6 module (`mathicall.mjs`), both of which can be found in the `/build` directory. To make use of MathicallJS, download the appropriate file to a convenient location (e.g. your project directory) and load it according to one of the examples below. MathicallJS is not currently available as an `npm` package.
 
 ### In HTML page:
 #### mathicall.js
@@ -20,24 +24,13 @@ Running `mathicall.js` in a HTML page creates a global `Mathicall` object throug
 </script>
 ```
 
-
 #### mathicall.mjs
-Loading the `mathicall.mjs` module can be done in two ways, depending on whether you would like to create a global `Mathicall` object. Note that due to web-browsers' _CORS_ policy, modules can only be included in HTML pages hosted by a web server; if you're loading a HTML page statically (e.g. using a browser to open a .html file), use the previous `mathicall.js` example.
-##### Example 1
-```html
-<!-- Load MathicallJS module -->
-<script type="module" src="path/to/mathicall.mjs"></script>
-
-<!-- Use library directly -->
-<script type="text/javascript">
-	standard.fract(1.577); //0.577
-</script>
-```
-##### Example 2
+Loading the `mathicall.mjs` in a HTML page is not recommended, but possible. The following example creates a `Mathicall` object from the module. Note that due to web-browsers' _CORS_ policy, modules can only be included in HTML pages hosted by a web server; if you're loading a HTML page statically (e.g. using a browser to open a .html file), use the previous `mathicall.js` example.
 ```html
 <!-- Load MathicallJS module inside module script -->
 <script type="module">
 	import * as Mathicall from "path/to/mathicall.mjs";
+	window.Mathicall = Mathicall;
 </script>
 
 <!-- Use library through Mathicall object -->
