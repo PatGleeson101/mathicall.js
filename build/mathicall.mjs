@@ -25,6 +25,12 @@ function checkOutputOverflow(output, funcStr = "", rootStr = "") {
 	if (output === Number.MAX_VALUE) {console.warn(`[${rootStr}] ${funcStr} overflow: returned Number.MAX_VALUE.`);}
 }
 
+//Freeze exports
+Object.freeze(isNumeric);
+Object.freeze(checkNumericInput);
+Object.freeze(checkIntInput);
+Object.freeze(checkOutputOverflow);
+
 //Constants
 const E = Math.E;
 const LN2 = Math.LN2;
@@ -85,6 +91,13 @@ function rad(degrees) {
 	return degrees * DEG_TO_RAD;
 }
 
+// Freeze function exports
+Object.freeze(lerp);
+Object.freeze(mod);
+Object.freeze(fract);
+Object.freeze(deg);
+Object.freeze(rad);
+
 function d_lerp(x, y, r) {
 	checkNumericInput({x:x, y:y, r:r}, 'lerp(x, y, r)', 'std.debug');
 	return lerp(x, y, r);
@@ -109,6 +122,13 @@ function d_rad(degrees) {
 	checkNumericInput({degrees: degrees}, 'rad(degrees)', 'std.debug');
 	return rad(degrees);
 }
+
+// Freeze exports
+Object.freeze(d_lerp);
+Object.freeze(d_mod);
+Object.freeze(d_fract);
+Object.freeze(d_deg);
+Object.freeze(d_rad);
 
 var stdDebug = /*#__PURE__*/Object.freeze({
 	__proto__: null,
@@ -162,26 +182,21 @@ var standardLib = /*#__PURE__*/Object.freeze({
 	rad: rad
 });
 
-function precomputeFactorials() { //Private to module
-	const result = new Float64Array(171);
+function computeFactorials(n = 170) { //n > 170 overflows JS's Number type
+	const len = n + 1;
+	const result = new Float64Array(len);
 	result[0] = 1;
-	for (let i = 1; i < 171; i++) {
+	for (let i = 1; i < len; i++) {
 		result[i] = i * result[i-1];
 	}
 	return result;
 }
 
-function precomputeBinomials(b) {
-	let n = 30;
-	if ((b.constructor === Number)&&(isFinite(b))) { //Only accept numeric input
-		n = abs(round(b));
-	} else {
-		throw "precomputeBinomials takes numeric input";
-	}
-	const len = 0.5 * (++n) * (n + 1);
+function computeBinomials(n = 30) {
+	const len = 0.5 * (n + 1) * (n + 2);
 	const result = new Float64Array(len);
 	let i = -1;
-	for (let k = 0; k < n; k++) {
+	for (let k = 0; k <= n; k++) {
 		result[i++] = 1;
 		for (let r = 1; r < k; r++) {
 			result[i] = result[i - k - 1] + result[i - k];
@@ -192,9 +207,16 @@ function precomputeBinomials(b) {
 	return result;
 }
 
-const FACTORIALS = precomputeFactorials(); //Max factorial is 170!
-let BINOM_MAX_STORED_N = 30;
-let BINOMIALS = precomputeBinomials(BINOM_MAX_STORED_N);
+const FACTORIALS = computeFactorials();
+let BINOM_MAX_CACHED_N;
+let BINOMIALS;
+
+function precomputeBinomials(n) {
+	BINOM_MAX_CACHED_N = n;
+	BINOMIALS = computeBinomials(n);
+}
+
+precomputeBinomials(30);
 
 //Combinatorial functions
 function factorial(n) {
@@ -204,18 +226,18 @@ function factorial(n) {
 }
 
 function choose(n, r) {
-	if ((r > n)||(n < 0)||(r < 0)) {return 0;} //Return 0
-	if (n <= BINOM_MAX_STORED_N) {return BINOMIALS[0.5 * n * (n + 1) + r];} //Return pre-computed
+	if ((r > n)||(n < 0)||(r < 0)) {return 0;} // Quick return 0
+	if (n <= BINOM_MAX_CACHED_N) {return BINOMIALS[0.5 * n * (n + 1) + r];} //Return pre-computed
 	//Not pre-computed
 	const k = min(r, n - r);
-	if (k > 514) {return Number.MAX_VALUE;} //Overflow check
+	if (k > 514) {return Number.MAX_VALUE;} //Quick return for known overflow
 	const nMinusK = n - k;
 	let result = 1;
 	let i = 1;
 	while (i <= k) {
 		result *= (nMinusK + i)/(i++);
 	}
-	return result;
+	return result; //Could still have overflown
 }
 
 function permute(n, r) {
@@ -304,6 +326,17 @@ function mpow(base, exp, m) {
 	}
 }
 
+// Freeze exports
+Object.freeze(computeFactorials);
+Object.freeze(computeBinomials);
+Object.freeze(precomputeBinomials);
+Object.freeze(factorial);
+Object.freeze(choose);
+Object.freeze(permute);
+Object.freeze(gcd);
+Object.freeze(lcm);
+Object.freeze(mpow);
+
 function d_factorial(n) {
 	checkIntInput({n: n}, "factorial(n)", "int.debug");
 	const result = factorial(n);
@@ -340,6 +373,14 @@ function d_mpow(base, exp, m) { //Unsure whether to reject negative input
 	return mpow(base, exp, m);
 }
 
+// Freeze exports
+Object.freeze(d_factorial);
+Object.freeze(d_choose);
+Object.freeze(d_permute);
+Object.freeze(d_gcd);
+Object.freeze(d_lcm);
+Object.freeze(d_mpow);
+
 var intDebug = /*#__PURE__*/Object.freeze({
 	__proto__: null,
 	factorial: d_factorial,
@@ -353,6 +394,8 @@ var intDebug = /*#__PURE__*/Object.freeze({
 var integerLib = /*#__PURE__*/Object.freeze({
 	__proto__: null,
 	debug: intDebug,
+	computeFactorials: computeFactorials,
+	computeBinomials: computeBinomials,
 	precomputeBinomials: precomputeBinomials,
 	factorial: factorial,
 	choose: choose,
@@ -567,6 +610,42 @@ function polar2(vec, target = new Float64Array(2)) {
 	target[1] = atan2(vec[1], vec[0]) + PI;
 }
 
+// Freeze exports
+Object.freeze(dot);
+Object.freeze(dot2);
+Object.freeze(dot3);
+Object.freeze(dot4);
+Object.freeze(cross3);
+Object.freeze(add);
+Object.freeze(add2);
+Object.freeze(add3);
+Object.freeze(add4);
+Object.freeze(sub);
+Object.freeze(sub2);
+Object.freeze(sub3);
+Object.freeze(sub4);
+Object.freeze(mag);
+Object.freeze(mag2);
+Object.freeze(mag3);
+Object.freeze(mag4);
+Object.freeze(smult);
+Object.freeze(smult2);
+Object.freeze(smult3);
+Object.freeze(smult4);
+Object.freeze(normalize);
+Object.freeze(normalize2);
+Object.freeze(normalize3);
+Object.freeze(normalize4);
+Object.freeze(angle);
+Object.freeze(angle2);
+Object.freeze(angle3);
+Object.freeze(angle4);
+Object.freeze(fract$1);
+Object.freeze(fract2);
+Object.freeze(fract3);
+Object.freeze(fract4);
+Object.freeze(polar2);
+
 var vecRectLib = /*#__PURE__*/Object.freeze({
 	__proto__: null,
 	dot: dot,
@@ -630,6 +709,13 @@ function rect2(vec, target = new Float64Array(2)) {
 	target[1] = r * sin(theta);
 	return target;
 }
+
+// Freeze exports
+Object.freeze(dot2$1);
+Object.freeze(mag$1);
+Object.freeze(smult2$1);
+Object.freeze(normalize2$1);
+Object.freeze(rect2);
 
 var vecPolarLib = /*#__PURE__*/Object.freeze({
 	__proto__: null,
@@ -817,6 +903,20 @@ function inverse2(mat, target = new Float64Array(4)) {
 	return target;
 }
 
+// Freeze exports
+Object.freeze(zeros);
+Object.freeze(constant);
+Object.freeze(identity);
+Object.freeze(flatten);
+Object.freeze(smult$1);
+Object.freeze(transpose2);
+Object.freeze(transpose3);
+Object.freeze(transpose4);
+Object.freeze(mmult);
+Object.freeze(size);
+Object.freeze(det2);
+Object.freeze(inverse2);
+
 var matrixLib = /*#__PURE__*/Object.freeze({
 	__proto__: null,
 	zeros: zeros,
@@ -912,6 +1012,20 @@ function polar(z, target = new Float64Array(2)) {
 	return target;
 }
 
+// Freeze exports
+Object.freeze(conj);
+Object.freeze(real);
+Object.freeze(imag);
+Object.freeze(arg);
+Object.freeze(abs$1);
+Object.freeze(add$1);
+Object.freeze(sub$1);
+Object.freeze(cmult);
+Object.freeze(smult$2);
+Object.freeze(div);
+Object.freeze(inverse);
+Object.freeze(polar);
+
 var compRectLib = /*#__PURE__*/Object.freeze({
 	__proto__: null,
 	conj: conj,
@@ -928,7 +1042,7 @@ var compRectLib = /*#__PURE__*/Object.freeze({
 	polar: polar
 });
 
-function toArg(angle) {
+function toArg(angle) { //Not to be exported
 	angle = angle%TWO_PI;
 	if (angle > PI) {return angle - TWO_PI;}
 	if (angle < -PI) {return angle + TWO_PI;}
@@ -1039,6 +1153,19 @@ function rect(z, target = new Float64Array(2)) {
 	target[1] = r * sin(theta);
 	return target;
 }
+
+// Freeze exports
+Object.freeze(conj$1);
+Object.freeze(real$1);
+Object.freeze(imag$1);
+Object.freeze(arg$1);
+Object.freeze(abs$2);
+Object.freeze(smult$3);
+Object.freeze(cmult$1);
+Object.freeze(div$1);
+Object.freeze(pow$1);
+Object.freeze(inverse$1);
+Object.freeze(rect);
 
 var compPolarLib = /*#__PURE__*/Object.freeze({
 	__proto__: null,
@@ -1186,6 +1313,14 @@ function indexOf(arr, value, sorted = false) {
 	}
 	return -1; //Not contained
 }
+
+// Freeze exports
+Object.freeze(sum);
+Object.freeze(min$1);
+Object.freeze(max$1);
+Object.freeze(prod);
+Object.freeze(unique);
+Object.freeze(indexOf);
 
 var arrayLib = /*#__PURE__*/Object.freeze({
 	__proto__: null,

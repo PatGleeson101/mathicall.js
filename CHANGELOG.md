@@ -1,5 +1,8 @@
 # Changelog
 
+#### Dev
+- All MathicallJS functions are now frozen, preventing their properties from being modified
+
 #### beta-3.0.0
 - Introduced changelog
 - Switched to using ES6 module syntax instead of function closures, to improve ease of development and installation.

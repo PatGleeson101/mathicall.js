@@ -26,4 +26,12 @@ function d_rad(degrees) {
 	return extra.rad(degrees);
 }
 
+// Freeze exports
+Object.freeze(d_lerp);
+Object.freeze(d_mod);
+Object.freeze(d_fract);
+Object.freeze(d_deg);
+Object.freeze(d_rad);
+
+// Export
 export {d_lerp as lerp, d_mod as mod, d_fract as fract, d_deg as deg, d_rad as rad}

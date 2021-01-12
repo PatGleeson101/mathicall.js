@@ -1,11 +1,11 @@
-export function zeros(m, n) {
+function zeros(m, n) {
 	const result = new Float64Array(m * n);
 	result.rows = m;
 	result.cols = n;
 	return result;
 }
 
-export function constant(m, n, value) {
+function constant(m, n, value) {
 	const result = new Float64Array(m * n);
 	result.fill(value);
 	result.rows = m;
@@ -13,7 +13,7 @@ export function constant(m, n, value) {
 	return result;
 }
 
-export function identity(m) {
+function identity(m) {
 	const len = m * m;
 	const inc = m + 1;
 	const result = new Float64Array(len);
@@ -25,7 +25,7 @@ export function identity(m) {
 	return result;
 }
 
-export function flatten(mat2d, target = new Float64Array(mat2d.length * mat2d[0].length)) { //Flattens 2D array into 1D array
+function flatten(mat2d, target = new Float64Array(mat2d.length * mat2d[0].length)) { //Flattens 2D array into 1D array
 	const rows = mat2d.length;
 	const cols = mat2d[0].length;
 	for (let i = 0; i < rows; i++) {
@@ -39,7 +39,7 @@ export function flatten(mat2d, target = new Float64Array(mat2d.length * mat2d[0]
 }
 
 //Scaling
-export function smult(mat, k, target = new Float64Array(mat.length)) {
+function smult(mat, k, target = new Float64Array(mat.length)) {
 	const len = mat.length;
 	for (let i = 0; i < len; i++) {
 		target[i] = mat[i] * k;
@@ -50,7 +50,7 @@ export function smult(mat, k, target = new Float64Array(mat.length)) {
 }
 
 //Transpose
-export function transpose2(mat, target = new Float64Array(4)) {
+function transpose2(mat, target = new Float64Array(4)) {
 	//Main diagonal
 	target[0] = mat[0];
 	target[3] = mat[3];
@@ -63,7 +63,7 @@ export function transpose2(mat, target = new Float64Array(4)) {
 	return target;
 }
 
-export function transpose3(mat, target = new Float64Array(9)) {
+function transpose3(mat, target = new Float64Array(9)) {
 	//Main diagonal
 	target[0] = mat[0];
 	target[4] = mat[4];
@@ -83,7 +83,7 @@ export function transpose3(mat, target = new Float64Array(9)) {
 	return target;
 }
 
-export function transpose4(mat, target = new Float64Array(16)) {
+function transpose4(mat, target = new Float64Array(16)) {
 	//Main diagonal
 	target[0] = mat[0];
 	target[5] = mat[5];
@@ -114,7 +114,7 @@ export function transpose4(mat, target = new Float64Array(16)) {
 }
 
 //Matrix multiplication
-export function mmult(mat1, mat2) { //consider adding target parameter
+function mmult(mat1, mat2) { //consider adding target parameter
 	const r1 = mat1.rows;
 	const c1 = mat1.cols;
 	const r2 = mat2.rows;
@@ -142,17 +142,17 @@ export function mmult(mat1, mat2) { //consider adding target parameter
 }
 
 //Size
-export function size(mat) {
+function size(mat) {
 	return [mat.rows, mat.cols];
 }
 
 //Determinant
-export function det2(mat) {
+function det2(mat) {
 	return mat[0] * mat[3] - mat[1] * mat[2];
 }
 
 //Inverse
-export function inverse2(mat, target = new Float64Array(4)) {
+function inverse2(mat, target = new Float64Array(4)) {
 	const a00 = mat[0];
 	const a01 = mat[1];
 	const a10 = mat[2];
@@ -168,3 +168,20 @@ export function inverse2(mat, target = new Float64Array(4)) {
 	target.cols = 2;
 	return target;
 }
+
+// Freeze exports
+Object.freeze(zeros);
+Object.freeze(constant);
+Object.freeze(identity);
+Object.freeze(flatten);
+Object.freeze(smult);
+Object.freeze(transpose2);
+Object.freeze(transpose3);
+Object.freeze(transpose4);
+Object.freeze(mmult);
+Object.freeze(size);
+Object.freeze(det2);
+Object.freeze(inverse2);
+
+// Export
+export {zeros, constant, identity, flatten, smult, transpose2, transpose3, transpose4, mmult, size, det2, inverse2}

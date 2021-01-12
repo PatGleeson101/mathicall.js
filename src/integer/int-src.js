@@ -1,25 +1,20 @@
 import {round, abs, min} from "../standard/standard-lib.js";
 
-function precomputeFactorials() { //Private to module
-	const result = new Float64Array(171);
+function computeFactorials(n = 170) { //n > 170 overflows JS's Number type
+	const len = n + 1;
+	const result = new Float64Array(len);
 	result[0] = 1;
-	for (let i = 1; i < 171; i++) {
+	for (let i = 1; i < len; i++) {
 		result[i] = i * result[i-1];
 	}
 	return result;
 }
 
-export function precomputeBinomials(b) {
-	let n = 30;
-	if ((b.constructor === Number)&&(isFinite(b))) { //Only accept numeric input
-		n = abs(round(b));
-	} else {
-		throw "precomputeBinomials takes numeric input";
-	}
-	const len = 0.5 * (++n) * (n + 1);
+function computeBinomials(n = 30) {
+	const len = 0.5 * (n + 1) * (n + 2);
 	const result = new Float64Array(len);
 	let i = -1;
-	for (let k = 0; k < n; k++) {
+	for (let k = 0; k <= n; k++) {
 		result[i++] = 1;
 		for (let r = 1; r < k; r++) {
 			result[i] = result[i - k - 1] + result[i - k];
@@ -30,33 +25,40 @@ export function precomputeBinomials(b) {
 	return result;
 }
 
-const FACTORIALS = precomputeFactorials(); //Max factorial is 170!
-let BINOM_MAX_STORED_N = 30;
-let BINOMIALS = precomputeBinomials(BINOM_MAX_STORED_N);
+const FACTORIALS = computeFactorials();
+let BINOM_MAX_CACHED_N;
+let BINOMIALS;
+
+function precomputeBinomials(n) {
+	BINOM_MAX_CACHED_N = n;
+	BINOMIALS = computeBinomials(n)
+}
+
+precomputeBinomials(30);
 
 //Combinatorial functions
-export function factorial(n) {
+function factorial(n) {
 	if (n < 0) {return undefined;}
 	if (n > 170) {return Number.MAX_VALUE;}
 	return FACTORIALS[n];
 }
 
-export function choose(n, r) {
-	if ((r > n)||(n < 0)||(r < 0)) {return 0;} //Return 0
-	if (n <= BINOM_MAX_STORED_N) {return BINOMIALS[0.5 * n * (n + 1) + r];} //Return pre-computed
+function choose(n, r) {
+	if ((r > n)||(n < 0)||(r < 0)) {return 0;} // Quick return 0
+	if (n <= BINOM_MAX_CACHED_N) {return BINOMIALS[0.5 * n * (n + 1) + r];} //Return pre-computed
 	//Not pre-computed
 	const k = min(r, n - r);
-	if (k > 514) {return Number.MAX_VALUE;} //Overflow check
+	if (k > 514) {return Number.MAX_VALUE;} //Quick return for known overflow
 	const nMinusK = n - k;
 	let result = 1;
 	let i = 1;
 	while (i <= k) {
 		result *= (nMinusK + i)/(i++);
 	}
-	return result;
+	return result; //Could still have overflown
 }
 
-export function permute(n, r) {
+function permute(n, r) {
 	if ((r > n) || (n < 0) || (r < 0)) {return 0;}
 	if (r > 170) {return Number.MAX_VALUE;}
 	r = n - r;
@@ -75,7 +77,7 @@ export function permute(n, r) {
 }
 
 //Greatest common divisor
-export function gcd(a, b) {
+function gcd(a, b) {
 	//Input & trivial cases
 	a = abs(a);
 	b = abs(b);
@@ -117,13 +119,13 @@ export function gcd(a, b) {
 }
 
 //Lowest common multiple
-export function lcm(a, b) {
+function lcm(a, b) {
 	if ((a === 0)||(b === 0)) {return 0;}
 	return abs((a / gcd(a, b)) * b);
 }
 
 //Modular exponentiation
-export function mpow(base, exp, m) {
+function mpow(base, exp, m) {
 	base = abs(base);
 	exp = abs(exp);
 	if (m === 1) {
@@ -141,3 +143,18 @@ export function mpow(base, exp, m) {
 		return result;
 	}
 }
+
+// Freeze exports
+Object.freeze(computeFactorials);
+Object.freeze(computeBinomials);
+Object.freeze(precomputeBinomials);
+Object.freeze(factorial);
+Object.freeze(choose);
+Object.freeze(permute);
+Object.freeze(gcd);
+Object.freeze(lcm);
+Object.freeze(mpow);
+
+// Export
+export {computeFactorials, computeBinomials, precomputeBinomials, factorial, choose}
+export {permute, gcd, lcm, mpow}

@@ -8,22 +8,32 @@ export const HALF_PI = 0.5 * PI;
 export const INV_PI = 1 / PI;
 
 //Functions
-export function lerp(x, y, r) {
+function lerp(x, y, r) {
 	return x + (y - x) * r;
 }
 
-export function mod(x, m) {
+function mod(x, m) {
 	return ((x%m)+m)%m;
 }
 
-export function fract(x) {
+function fract(x) {
 	return x - trunc(x);
 }
 
-export function deg(radians) {
+function deg(radians) {
 	return radians * RAD_TO_DEG;
 }
 
-export function rad(degrees) {
+function rad(degrees) {
 	return degrees * DEG_TO_RAD;
 }
+
+// Freeze function exports
+Object.freeze(lerp);
+Object.freeze(mod);
+Object.freeze(fract);
+Object.freeze(deg);
+Object.freeze(rad);
+
+// Export functions
+export {lerp, mod, fract, deg, rad}

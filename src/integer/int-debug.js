@@ -37,5 +37,14 @@ function d_mpow(base, exp, m) { //Unsure whether to reject negative input
 	return mpow(base, exp, m);
 }
 
+// Freeze exports
+Object.freeze(d_factorial);
+Object.freeze(d_choose);
+Object.freeze(d_permute);
+Object.freeze(d_gcd);
+Object.freeze(d_lcm);
+Object.freeze(d_mpow);
+
+// Export
 export {d_factorial as factorial, d_choose as choose, d_permute as permute}
 export {d_gcd as gcd, d_lcm as lcm, d_mpow as mpow}

@@ -2,7 +2,7 @@ import {random, floor, min as stdMin, max as stdMax} from "../standard/standard-
 
 const MAX_LINEAR_SEARCH_LENGTH = 64; //Yet to be optimised
 
-export function sum(arr) {
+function sum(arr) {
 	const len = arr.length;
 	let result = 0;
 	for (let i = 0; i < len; i++) {
@@ -11,7 +11,7 @@ export function sum(arr) {
 	return result;
 }
 
-export function min(arr, sorted = false) {
+function min(arr, sorted = false) {
 	const len = arr.length;
 	if (sorted) {
 		return stdMin(arr[0], arr[len-1]);
@@ -27,7 +27,7 @@ export function min(arr, sorted = false) {
 	return result;
 }
 
-export function max(arr, sorted = false) {
+function max(arr, sorted = false) {
 	const len = arr.length;
 	if (sorted) {
 		return stdMax(arr[0], arr[len-1]);
@@ -43,7 +43,7 @@ export function max(arr, sorted = false) {
 	return result;
 }
 
-export function prod(arr) {
+function prod(arr) {
 	const len = arr.length;
 	let result = arr[0]; //Defaults to undefined if array is empty
 	for (let i = 1; i < len; i++) {
@@ -52,7 +52,7 @@ export function prod(arr) {
 	return result;
 }
 
-export function unique(arr, sorted = false) {
+function unique(arr, sorted = false) {
 	const len = arr.length;
 	if (sorted) { //Sorted
 		const uniqueElements = new Float64Array(len); //In future, reduce wasted memory by allocating in blocks
@@ -79,7 +79,7 @@ export function unique(arr, sorted = false) {
 	}
 }
 
-export function indexOf(arr, value, sorted = false) {
+function indexOf(arr, value, sorted = false) {
 	const len = arr.length;
 	if ((!sorted)||(len <= MAX_LINEAR_SEARCH_LENGTH)) { //Unsorted or small length
 		for (let i = 0; i < len; i++) {
@@ -125,3 +125,14 @@ export function indexOf(arr, value, sorted = false) {
 	}
 	return -1; //Not contained
 }
+
+// Freeze exports
+Object.freeze(sum);
+Object.freeze(min);
+Object.freeze(max);
+Object.freeze(prod);
+Object.freeze(unique);
+Object.freeze(indexOf);
+
+// Export exports
+export {sum, min, max, prod, unique, indexOf}
