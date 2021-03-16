@@ -1,8 +1,12 @@
-//Constants
+//Math constants
 export const E = Math.E;
 export const LN2 = Math.LN2;
 export const SQRT2 = Math.SQRT2;
 export const PI = Math.PI;
+
+//Number constants
+export const MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER;
+export const MAX_VALUE = Number.MAX_VALUE;
 
 //Functions
 export const abs = Math.abs;

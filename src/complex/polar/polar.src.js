@@ -1,4 +1,4 @@
-import {PI, TWO_PI, cos, sin, abs as stdAbs, pow as stdPow} from "../../standard/standard-lib.js";
+import {PI, TWO_PI, cos, sin, abs as stdAbs, pow as stdPow} from "../../standard/standard.lib.js";
 
 function toArg(angle) { //Not to be exported
 	angle = angle%TWO_PI;

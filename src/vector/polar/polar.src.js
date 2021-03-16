@@ -1,4 +1,4 @@
-import {cos, sin, abs, TWO_PI, mod} from "../../standard/standard-lib.js";
+import {cos, sin, abs, TWO_PI, mod} from "../../standard/standard.lib.js";
 
 function dot2(vec1, vec2) {
 	return vec1[0] * vec2[0] * cos(vec1[1] - vec2[1]);

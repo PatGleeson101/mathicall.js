@@ -1,4 +1,4 @@
-import {round, abs, min} from "../standard/standard-lib.js";
+import {round, abs, min, MAX_VALUE} from "../standard/standard.lib.js";
 
 function computeFactorials(n = 170) { //n > 170 overflows JS's Number type
 	const len = n + 1;
@@ -39,7 +39,7 @@ precomputeBinomials(30);
 //Combinatorial functions
 function factorial(n) {
 	if (n < 0) {return undefined;}
-	if (n > 170) {return Number.MAX_VALUE;}
+	if (n > 170) {return MAX_VALUE;}
 	return FACTORIALS[n];
 }
 
@@ -48,7 +48,7 @@ function choose(n, r) {
 	if (n <= BINOM_MAX_CACHED_N) {return BINOMIALS[0.5 * n * (n + 1) + r];} //Return pre-computed
 	//Not pre-computed
 	const k = min(r, n - r);
-	if (k > 514) {return Number.MAX_VALUE;} //Quick return for known overflow
+	if (k > 514) {return MAX_VALUE;} //Quick return for known overflow
 	const nMinusK = n - k;
 	let result = 1;
 	let i = 1;
@@ -60,7 +60,7 @@ function choose(n, r) {
 
 function permute(n, r) {
 	if ((r > n) || (n < 0) || (r < 0)) {return 0;}
-	if (r > 170) {return Number.MAX_VALUE;}
+	if (r > 170) {return MAX_VALUE;}
 	r = n - r;
 	if (n < 171) {
 		return round(FACTORIALS[n]/FACTORIALS[r]);
@@ -126,7 +126,7 @@ function lcm(a, b) {
 
 //Modular exponentiation
 function mpow(base, exp, m) {
-	base = abs(base);
+	//base = abs(base);
 	exp = abs(exp);
 	if (m === 1) {
 		return 0;

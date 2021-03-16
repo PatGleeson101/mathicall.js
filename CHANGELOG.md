@@ -2,6 +2,8 @@
 
 #### Dev
 - All MathicallJS functions are now frozen, preventing their properties from being modified
+- Clearer file naming convention
+- Introduced debug mode
 
 #### beta-3.0.0
 - Introduced changelog

@@ -1,4 +1,4 @@
-import {sqrt, acos, hypot, abs, atan2, PI, TWO_PI, fract as sfract, mod} from "../../standard/standard-lib.js";
+import {sqrt, acos, hypot, abs, atan2, PI, TWO_PI, fract as sfract, mod} from "../../standard/standard.lib.js";
 
 //Dot product
 function dot(vec1, vec2) {

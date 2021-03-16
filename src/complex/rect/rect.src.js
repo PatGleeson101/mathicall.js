@@ -1,4 +1,4 @@
-import {atan2, sin, hypot, abs as stdAbs} from "../../standard/standard-lib.js";
+import {atan2, sin, hypot, abs as stdAbs} from "../../standard/standard.lib.js";
 
 function conj(z, target = new Float64Array(2)) {
 	target[0] = z[0];

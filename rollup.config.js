@@ -1,7 +1,7 @@
 import {terser} from 'rollup-plugin-terser';
 
 export default {
-	input: 'src/mathicall-lib.js',
+	input: 'src/mathicall.lib.js',
 	output: [
 		{
 			file: 'build/mathicall.js',
@@ -9,7 +9,7 @@ export default {
 			name: 'Mathicall'
 		},
 		{
-			file: 'build/mathicall.mjs',
+			file: 'build/mathicall.module.js',
 			format: 'es',
 		},
 		{

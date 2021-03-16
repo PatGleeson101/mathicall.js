@@ -1,4 +1,4 @@
-import {random, floor, min as stdMin, max as stdMax} from "../standard/standard-lib.js";
+import {random, floor, min as stdMin, max as stdMax} from "../standard/standard.lib.js";
 
 const MAX_LINEAR_SEARCH_LENGTH = 64; //Yet to be optimised
 

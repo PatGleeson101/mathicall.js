@@ -1,4 +1,4 @@
-import {PI, trunc} from "./std-inbuilt.js";
+import {PI, trunc} from "./inbuilt.src.js";
 
 //Constants
 export const RAD_TO_DEG = 180 / PI;
@@ -28,12 +28,19 @@ function rad(degrees) {
 	return degrees * DEG_TO_RAD;
 }
 
+function linmap(x, domain, range) {
+	const r0 = range[0];
+	const d0 = domain[0];
+	return r0 + (range[1] - r0) * (x - d0) / (domain[1] - d0);
+}
+
 // Freeze function exports
 Object.freeze(lerp);
 Object.freeze(mod);
 Object.freeze(fract);
 Object.freeze(deg);
 Object.freeze(rad);
+Object.freeze(linmap)
 
 // Export functions
-export {lerp, mod, fract, deg, rad}
+export {lerp, mod, fract, deg, rad, linmap}
