@@ -1,6 +1,6 @@
 # MathicallJS
 
-MathicallJS is a javascript library that unites different areas of mathematics under a single high-performance API.
+MathicallJS is a javascript library that connects different areas of mathematics under a single high-performance API.
 
 [Usage](#usage) &mdash;
 [Features](#features) &mdash;
@@ -9,9 +9,9 @@ MathicallJS is a javascript library that unites different areas of mathematics u
 [About](#about)
 
 ## Usage
-The MathicallJS library is currently available as both a static script (`mathicall.js`) and an ES6 module (`mathicall.mjs`), both of which can be found in the `/build` directory. To make use of MathicallJS, download the appropriate file to a convenient location (e.g. your project directory) and load it according to one of the examples below. MathicallJS is not currently available as an `npm` package.
+The MathicallJS library is currently available as both a static script (`mathicall.js`) and an ES6 module (`mathicall.module.js`), both of which can be found in the `build/` directory. To make use of MathicallJS, download the appropriate file to a convenient location (e.g. your project directory) and load it according to one of the examples below. MathicallJS is not currently available as an `npm` package.
 
-### In HTML page:
+### HTML
 #### mathicall.js
 Running `mathicall.js` in a HTML page creates a global `Mathicall` object through which you can access the library.
 ```html
@@ -24,12 +24,12 @@ Running `mathicall.js` in a HTML page creates a global `Mathicall` object throug
 </script>
 ```
 
-#### mathicall.mjs
-Loading the `mathicall.mjs` in a HTML page is not recommended, but possible. The following example creates a `Mathicall` object from the module. Note that due to web-browsers' _CORS_ policy, modules can only be included in HTML pages hosted by a web server; if you're loading a HTML page statically (e.g. using a browser to open a .html file), use the previous `mathicall.js` example.
+#### mathicall.module.js
+Loading `mathicall.module.js` in a HTML page is not recommended, but possible. The following example creates a `Mathicall` object from the module. Note that due to web-browsers' _CORS_ policy, modules can only be included in HTML pages hosted by a web server; if you're loading a HTML page statically (e.g. using a browser to open a .html file), use the previous `mathicall.js` example.
 ```html
 <!-- Load MathicallJS module inside module script -->
 <script type="module">
-	import * as Mathicall from "path/to/mathicall.mjs";
+	import * as Mathicall from "path/to/mathicall.module.js";
 	window.Mathicall = Mathicall;
 </script>
 
@@ -39,30 +39,30 @@ Loading the `mathicall.mjs` in a HTML page is not recommended, but possible. The
 </script>
 ```
 
-### In module or Node.js
-Other ES6 modules and sufficiently-recent Node.js versions (at or above 13.2.0) can include `mathicall.mjs` using normal ES6 syntax:
+### Module or Node.js
+Other ES6 modules and sufficiently-recent Node.js versions (at or above 13.2.0) can include `mathicall.module.js` using normal ES6 syntax:
 ##### Example 1
 ```javascript
-import * as Mathicall from "path/to/mathicall.mjs";
+import * as Mathicall from "path/to/mathicall.module.js";
 Mathicall.vector.rect.dot([1, 2], [0.5, 3]); //6.5
 ```
 ##### Example 2
 ```javascript
-import * from "path/to/mathicall.mjs";
+import * from "path/to/mathicall.module.js";
 vector.rect.dot([1, 2], [0.5, 3]); //6.5
 ```
 ##### Example 3
 ```javascript
-import {vector} from "path/to/mathicall.mjs";
+import {vector} from "path/to/mathicall.module.js";
 vector.rect.dot([1, 2], [0.5, 3]); //6.5
 ```
 
 ## Features
-- Standard functions (e.g. lerp, mod)
+- Common functions (e.g. lerp, mod)
 - Vectors
 - Matrices
-- Random numbers (temporarily unavailable)
-- Random noise (temporarily unavailable)
+- Random numbers (returning soon)
+- Random noise (returning soon)
 - Complex numbers
 - Array operations (e.g. sum)
 - Integer operations (e.g. greatest common divisor)
