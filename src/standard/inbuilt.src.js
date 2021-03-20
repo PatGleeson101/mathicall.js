@@ -7,6 +7,7 @@ export const PI = Math.PI;
 //Number constants
 export const MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER;
 export const MAX_VALUE = Number.MAX_VALUE;
+export const EPSILON = Number.EPSILON;
 
 //Functions
 export const abs = Math.abs;
