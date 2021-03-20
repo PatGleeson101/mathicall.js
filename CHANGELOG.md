@@ -1,6 +1,9 @@
 # Changelog
 
 #### Dev
+- Introduce new array functions, notably `count(arr, value)`
+- Introduce `statistics` and `numerical` sublibraries
+- Re-introduce matrix-vector multiplication
 - All MathicallJS functions are now frozen, preventing their properties from being modified
 - Clearer file naming convention
 - Introduced debug mode
