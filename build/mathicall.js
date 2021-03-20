@@ -167,6 +167,7 @@ var Mathicall = (function (exports) {
     //Number constants
     const MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER;
     const MAX_VALUE = Number.MAX_VALUE;
+    const EPSILON = Number.EPSILON;
 
     //Functions
     const abs = Math.abs;
@@ -304,6 +305,7 @@ var Mathicall = (function (exports) {
         PI: PI,
         MAX_SAFE_INTEGER: MAX_SAFE_INTEGER,
         MAX_VALUE: MAX_VALUE,
+        EPSILON: EPSILON,
         abs: abs,
         sign: sign,
         round: round,
@@ -1268,30 +1270,30 @@ var Mathicall = (function (exports) {
         polar: polar_lib
     });
 
-    function zeros(m, n) {
-    	const result = new Float64Array(m * n);
-    	result.rows = m;
-    	result.cols = n;
+    function zeros(nrows, ncols) {
+    	const result = new Float64Array(nrows * ncols);
+    	result.nrows = nrows;
+    	result.ncols = ncols;
     	return result;
     }
 
-    function constant(m, n, value) {
-    	const result = new Float64Array(m * n);
+    function constant(nrows, ncols, value) {
+    	const result = new Float64Array(nrows * ncols);
     	result.fill(value);
-    	result.rows = m;
-    	result.cols = n;
+    	result.nrows = nrows;
+    	result.ncols = ncols;
     	return result;
     }
 
-    function identity(m) {
-    	const len = m * m;
-    	const inc = m + 1;
+    function identity(n) {
+    	const len = n * n;
+    	const inc = n + 1;
     	const result = new Float64Array(len);
     	for (let i = 0; i < len; i += inc) {
     		result[i] = 1;
     	}
-    	result.rows = m;
-    	result.cols = m;
+    	result.nrows = n;
+    	result.ncols = n;
     	return result;
     }
 
@@ -1314,8 +1316,8 @@ var Mathicall = (function (exports) {
     	for (let i = 0; i < len; i++) {
     		target[i] = mat[i] * k;
     	}
-    	target.rows = mat.rows;
-    	target.cols = mat.cols;
+    	target.nrows = mat.nrows;
+    	target.ncols = mat.ncols;
     	return target;
     }
 
@@ -1328,8 +1330,8 @@ var Mathicall = (function (exports) {
     	const cached = mat[1];
     	target[1] = mat[2];
     	target[2] = cached;
-    	target.rows = 2;
-    	target.cols = 2;
+    	target.nrows = 2;
+    	target.ncols = 2;
     	return target;
     }
 
@@ -1348,8 +1350,8 @@ var Mathicall = (function (exports) {
     	cached = mat[5];
     	target[5] = mat[7];
     	target[7] = cached;
-    	target.rows = 3;
-    	target.cols = 3;
+    	target.nrows = 3;
+    	target.ncols = 3;
     	return target;
     }
 
@@ -1378,20 +1380,20 @@ var Mathicall = (function (exports) {
     	cached = mat[11];
     	target[11] = mat[14];
     	target[14] = cached;
-    	target.rows = 4;
-    	target.cols = 4;
+    	target.nrows = 4;
+    	target.ncols = 4;
     	return target;
     }
 
     //Matrix multiplication
     function mmult(mat1, mat2) { //consider adding target parameter
-    	const r1 = mat1.rows;
-    	const c1 = mat1.cols;
-    	const r2 = mat2.rows;
-    	const c2 = mat2.cols;
+    	const r1 = mat1.nrows;
+    	const c1 = mat1.ncols;
+    	const r2 = mat2.nrows;
+    	const c2 = mat2.ncols;
     	const target = new Float64Array(r1 * c2);
-    	target.rows = r1;
-    	target.cols = c2;
+    	target.nrows = r1;
+    	target.ncols = c2;
     	let value = 0;
     	let x = 0;
     	let y = 0;
@@ -1413,7 +1415,7 @@ var Mathicall = (function (exports) {
 
     //Size
     function size(mat) {
-    	return [mat.rows, mat.cols];
+    	return [mat.rnows, mat.ncols];
     }
 
     //Determinant
@@ -1434,8 +1436,49 @@ var Mathicall = (function (exports) {
     	target[3] = a00 * coefficient;
     	target[1] = -a01 * coefficient;
     	target[2] = -a10 * coefficient;
-    	target.rows = 2;
-    	target.cols = 2;
+    	target.nrows = 2;
+    	target.ncols = 2;
+    	return target;
+    }
+
+    //Matrix-vector multiplication
+    function vmult(vec, mat) { //Premultiply by vector (assumed row-vector)
+    	const ncols = mat.ncols;
+    	const dimension = vec.length;
+    	if (dimension !== mat.nrows) {return undefined;}
+    	const target = new Float64Array(ncols);
+    	let matIndex = 0;
+    	for (let i = 0; i < dimension; i++) {
+    		vi = vec[i];
+    		for (let j = 0; j < ncols; j++) {
+    			target[j] += vi * mat[matIndex++];
+    		}
+    	}
+    	return target; //Result is a vector, not a matrix
+    }
+
+    function vmult2x2(vec, mat) {
+    	const target = new Float64Array(2);
+    	const v0 = vec[0];
+    	const v1 = vec[1];
+    	target[0] = v1 * mat[0] + v2 * mat[2];
+    	target[0] = v1 * mat[1] + v2 * mat[3];
+    	return target
+    }
+
+    function multv(mat, vec) {
+    	const nrows = mat.nrows;
+    	const ncols = mat.ncols;
+    	const len = mat.length;
+    	if (vec.length !== ncols) {return undefined;}
+    	const target = new Float64Array(ncols);
+    	for (let j = 0; j < ncols; j++) {
+    		vj = vec[j];
+    		let k = 0;
+    		for (let index = j; index < len; index += ncols) {
+    			target[k++] += vj * mat[index];
+    		}
+    	}
     	return target;
     }
 
@@ -1452,6 +1495,9 @@ var Mathicall = (function (exports) {
     Object.freeze(size);
     Object.freeze(det2);
     Object.freeze(inverse2);
+    Object.freeze(vmult);
+    Object.freeze(vmult2x2);
+    Object.freeze(multv);
 
     function zeros$1(m, n) {
         const signature = "zeros(m, n)";
@@ -1593,7 +1639,10 @@ var Mathicall = (function (exports) {
         mmult: mmult,
         size: size,
         det2: det2,
-        inverse2: inverse2
+        inverse2: inverse2,
+        vmult: vmult,
+        vmult2x2: vmult2x2,
+        multv: multv
     });
 
     function conj(z, target = new Float64Array(2)) {
@@ -2118,6 +2167,42 @@ var Mathicall = (function (exports) {
     	return result;
     }
 
+    function imax(arr, sorted = false) {
+    	const len = arr.length;
+    	if (len === 0) {return undefined;}
+    	if (sorted) {
+    		return (arr[0] >= arr[len-1]) ? 0 : len - 1; //>= is important; ensures first occurrence returned
+    	}
+    	let result = 0;
+    	let maxValue = arr[0] - 1;
+    	for (let i = 0; i < len; i++) {
+    		const value = arr[i];
+    		if (value > maxValue) {
+    			maxValue = value;
+    			result = i;
+    		}
+    	}
+    	return result;
+    }
+
+    function imin(arr, sorted = false) {
+    	const len = arr.length;
+    	if (len === 0) {return undefined;}
+    	if (sorted) {
+    		return (arr[0] <= arr[len-1]) ? 0 : len - 1;
+    	}
+    	let result = 0;
+    	let minValue = arr[0] + 1;
+    	for (let i = 0; i < len; i++) {
+    		const value = arr[i];
+    		if (value < minValue) {
+    			minValue = value;
+    			result = i;
+    		}
+    	}
+    	return result;
+    }
+
     function prod(arr) {
     	const len = arr.length;
     	let result = arr[0]; //Defaults to undefined if array is empty
@@ -2201,6 +2286,179 @@ var Mathicall = (function (exports) {
     	return -1; //Not contained
     }
 
+    function union(arr1, arr2, sorted = false) {
+    	const len1 = arr1.length;
+    	const len2 = arr2.length;
+    	if ( (!sorted) || (len1 + len2 < MAX_LINEAR_SEARCH_LENGTH) ) { //Arrays unsorted or short
+    		const unionElements = {};
+    		let value = 0;
+    		for (let i = 0; i < len1; i++) {
+    			value = arr1[i];
+    			store[value] = value;
+    		}
+    		for (let i = 0; i < len2; i++) {
+    			value = arr2[i];
+    			store[value] = value;
+    		}
+    		return new Float64Array(unionElements.values());
+    	} else { //Sorted and sufficiently long
+    		const result = [];
+    		let i = 0;
+    		let j = 0;
+    		let val1 = 0;
+    		let val2 = 0;
+    		let prev_val1 = NaN;
+    		let prev_val2 = NaN;
+    		while ( (i < len1) && (j < len2) ) {
+    			val1 = arr1[i];
+    			val2 = arr2[j];
+    			if (val1 < val2) {
+    				if (val1 !== prev_val1) {
+    					result.push(val1);
+    					prev_val1 = val1;
+    				}
+    				i++;
+    			} else if (val1 > val2) {
+    				if (val2 !== prev_val2) {
+    					result.push(val2);
+    					prev_val2 = val2;
+    				}
+    				j++;
+    			} else { //broken
+    				result.push(val1);
+    				i++;
+    				j++;
+    			}
+    			//Catch rest of larger array
+    			while (i < len1) {
+    				result.push(arr1[i++]);
+    			}
+    			while (j < len2) {
+    				result.push(arr2[j++]);
+    			}
+    			return new Float64Array(result);
+    		}
+    	}
+    }
+
+    function equal(arr1, arr2) {
+    	const len1 = arr1.length;
+    	const len2 = arr2.length;
+    	if (len1 !== len2) {return false;}
+    	for (let i = 0; i < len1; i++) {
+    		if (arr1[i] !== arr2[i]) {return false;}
+    	}
+    	return true;
+    }
+
+    function sortUint8(arr, target = new Uint8Array(arr.length)) { //Radix sort
+    	const buckets = new Uint32Array(256);
+    	const len = arr.length;
+    	for (let i = 0; i < len; i++) { //Count occurrences
+    		buckets[arr[i]] += 1;
+    	}
+    	let j = 0;
+    	for (let i = 0; i < 256; i++) {
+    		const count = buckets[i];
+    		for (let k = 0; k < count; k++) {
+    			target[j++] = i;
+    		}
+    	}
+    	return target;
+    }
+
+    function count(arr, value, sorted = false) {
+    	const len = set.length;
+    	let result = 0;
+    	if ((!sorted)||(arr.length <= MAX_LINEAR_SEARCH_LENGTH)) { //Unsorted or short array
+    		for (let i = 0; i < len; i++) {
+    			if (arr[i] === value) {result += 1;}
+    		}
+    	} else { //Sorted and sufficiently long
+    		//Get bounds
+    		let lowerBound = 0;
+    		let upperBound = len - 1;
+    		let startValue = arr[lowerBound];
+    		let endValue = arr[upperBound];
+    		let currentIndex = 0;
+    		let currentValue = 0;
+    		let pivot = undefined;
+    		//Find one occurrence (not necessarily first)
+    		if (startValue > endValue) { //Descending order
+    			if ((startValue < value)||(endValue > value)) {return 0;} //Quick return: value not contained
+    			while (upperBound - lowerBound > MAX_LINEAR_SEARCH_LENGTH) {
+    				currentIndex = floor(0.5 * (lowerBound + upperBound));
+    				currentValue = arr[currentIndex];
+    				if (currentValue > value) {
+    					lowerBound = currentIndex + 1;
+    				} else if (currentValue < value) {
+    					upperBound = currentIndex - 1;
+    				} else { //Found an instance
+    					pivot = currentIndex;
+    					break;
+    				}
+    			}
+    		} else { //Ascending order
+    			if ((startValue > value)||(endValue < value)) {return 0;} //Quick return: value not contained
+    			while (upperBound - lowerBound > MAX_LINEAR_SEARCH_LENGTH) {
+    				currentIndex = floor(0.5 * (lowerBound + upperBound));
+    				currentValue = arr[currentIndex];
+    				if (currentValue < value) {
+    					lowerBound = currentIndex + 1;
+    				} else if (currentValue > value) {
+    					upperBound = currentIndex - 1;
+    				} else { //Found an instance
+    					pivot = currentIndex;
+    					break;
+    				}
+    			}
+    		}
+    		if (pivot !== undefined) { //Could also check whether upperBound - lowerBound still > MAX_LINEAR_SEARCH_LENGTH
+    			//Initial search ended because a pivot was found. Split binary search to find first and last occurrence.
+    			//FIRST OCCURRENCE
+    			let upperBoundFirst = pivot;
+    			while (upperBoundFirst - lowerBound > MAX_LINEAR_SEARCH_LENGTH) {
+    				currentIndex = floor(0.5 * (lowerBound + upperBoundFirst));
+    				currentValue = arr[currentIndex];
+    				if (currentValue !== value) {
+    					lowerBound = currentIndex;
+    				} else {
+    					upperBoundFirst = currentIndex;
+    				}
+    			}
+    			// Linear search for first occurrence once region becomes small enough
+    			while (lowerBound <= upperBoundFirst) { 
+    				if (arr[lowerBound] === value) {break;}
+    				lowerBound++;
+    			}
+    			//LAST OCCURRENCE
+    			let lowerBoundLast = pivot;
+    			while (upperBound - lowerBoundLast > MAX_LINEAR_SEARCH_LENGTH) {
+    				currentIndex = floor(0.5 * (lowerBoundLast + upperBound));
+    				currentValue = arr[currentIndex];
+    				if (currentValue !== value) {
+    					lowerBoundLast = currentIndex;
+    				} else {
+    					upperBound = currentIndex;
+    				}
+    			}
+    			// Linear search for first occurrence once region becomes small enough
+    			while (lowerBoundLast <= upperBound) { 
+    				if (arr[lowerBoundLast] === value) {break;}
+    				lowerBoundLast++;
+    			}
+    			//Set result
+    			result = lowerBoundLast - lowerBound;
+    		} else {
+    			//Initial search ended because bounds got too close together
+    			for (let i = lowerBound; i <= upperBound; i++) {
+    				if (arr[i] === value) {result += 1;}
+    			}
+    		}
+    	}
+    	return result;
+    }
+
     // Freeze exports
     Object.freeze(sum);
     Object.freeze(min$1);
@@ -2208,6 +2466,12 @@ var Mathicall = (function (exports) {
     Object.freeze(prod);
     Object.freeze(unique);
     Object.freeze(indexOf);
+    Object.freeze(union);
+    Object.freeze(equal);
+    Object.freeze(sortUint8);
+    Object.freeze(imin);
+    Object.freeze(imax);
+    Object.freeze(count);
 
     function sum$1(arr) {
     	const signature = "sum(arr)";
@@ -2279,7 +2543,251 @@ var Mathicall = (function (exports) {
         max: max$1,
         prod: prod,
         unique: unique,
-        indexOf: indexOf
+        indexOf: indexOf,
+        union: union,
+        equal: equal,
+        sortUint8: sortUint8,
+        imin: imin,
+        imax: imax,
+        count: count
+    });
+
+    var statistics_debug = /*#__PURE__*/Object.freeze({
+        __proto__: null
+    });
+
+    function sum$2(arr, freq = undefined) {
+    	const count = arr.length;
+    	let sum = 0;
+    	if (freq === undefined) {
+    		for (let i = 0; i < count; i++) {
+    			sum += arr[i];
+    		}
+    	} else {
+    		for (let i = 0; i < count; i++) {
+    			sum += arr[i] * freq[i];
+    		}
+    	}
+    	return sum;
+    }
+
+    function mean(arr, freq = undefined) { //In future must add option to prevent overflow by breaking array down
+    	const count = arr.length;
+    	if (freq === undefined) {
+    		return sum$2(arr)/count;
+    	} else {
+    		let sum = 0;
+    		let size = 0;
+    		let f = 0;
+    		for (let i = 0; i < count; i++) {
+    			f = freq[i];
+    			sum += arr[i] * f;
+    			size += f;
+    		}
+    		return sum/size;
+    	}
+    }
+
+    function variance(arr, freq = undefined, sample = true) { //Can be made much more efficient in future
+    	const len = arr.length;
+    	let result = 0;
+    	const mu = mean(arr, freq);
+    	let n = len;
+    	if (freq === undefined) { //No frequency data
+    		for (let i = 0; i < len; i++) {
+    			const deviation = arr[i] - mu;
+    			result += deviation * deviation;
+    		}
+    	} else { //Use frequency data
+    		n = 0;
+    		for (let i = 0; i < len; i++) {
+    			const f = freq[i];
+    			n += f;
+    			const deviation = arr[i] - u;
+    			result += f * deviation * deviation;
+    		}
+    	}
+    	if (sample && (n > 1)) {n -= 1;}
+    	return result / n;
+    }
+
+    function sdev(arr, freq = undefined, sample = true) {
+    	return sqrt(variance(arr, freq, sample));
+    }
+
+    function cov(xarr, yarr, sample = true) {
+    	meanX = mean(xarr);
+    	meanY = mean(yarr);
+    	const n = xarr.length;
+    	let result = 0;
+    	for (let i = 0; i < n; i++) {
+    		result += (xarr[i] - meanX) * (yarr[i] - meanY);
+    	}
+    	if (sample && (n > 1)) {n -= 1;}
+    	return result / n;
+    }
+
+    function cor(xarr, yarr, sample = true) { //Could be significantly optimised
+    	if (xarr.length === 0) {return undefined;}
+    	const covariance = cov(xarr, yarr, sample);
+    	return covariance / (sdev(xarr) * sdev(yarr));
+    }
+
+    function modes(arr, freq = undefined, sorted = false) {
+    	const len = arr.length;
+    	if (len === 0) {return undefined;}
+    	if (freq === undefined) {
+    		[arr, freq] = toFreq(arr, sorted);
+    	}
+    	modes = {};
+    	maxValue = arr[0] - 1;
+    	for (let i = 0; i < len; i++) {
+    		const value = arr[i];
+    		if (value > maxValue) {
+    			maxValue = value;
+    			modes = {};
+    			modes[value] = true;
+    		} else if (value === maxValue) {
+    			modes[value] = true;
+    		}
+    	}
+    	return new Float64Array(modes.keys());
+    }
+
+    function toFreq(arr, sorted = false) { //TODO: make use of 'sorted' parameter
+    	const len = arr.length;
+    	freqeuencies = {}; //Warning: using Object.keys() might not give stable output order
+    	for (let i = 0; i < len; i++) {
+    		const value = arr[i];
+    		const current = frequencies[value];
+    		if (current === undefined) {
+    			frequencies[value] = 1;
+    		} else {
+    			frequencies[value] = current + 1;
+    		}
+    	}
+    	const valueArray = new Float64Array(frequencies.keys());
+    	const valueCount = valueArray.length;
+    	const freqArray = new Float64Array(valueCount);
+    	for (let i = 0; i < valueCount; i++) {
+    		freqArray[i] = frequencies[valueArray[i]];
+    	}
+    	return [valueArray, freqArray];
+    }
+
+    function freq(arr, value, sorted = false) {
+    	return count(arr, value, sorted);
+    }
+
+    function unifPdf(x, a, b) {
+    	if ((x < a)||(x > b)) {return 0;}
+    	return 1 / (a - b);
+    }
+
+    function unifCdf(x, a, b) {
+    	if (x < a){return 0;}
+    	if (x > b){return 1;}
+    	return (x - a) / (b - a);
+    }
+
+    function unifInvCdf(p, a, b) {
+    	return a + p * (a - b);
+    }
+
+    function expPdf(x, lambda) {
+    	return lambda * exp(-lambda * x);
+    }
+    function expCdf(x, lambda) {
+    	return 1 - exp(-lambda * x);
+    }
+    function expInvCdf(p, lambda) {
+    	return -ln(1 - p) / lambda;
+    }
+
+    Object.freeze(sum$2);
+    Object.freeze(mean);
+    Object.freeze(variance);
+    Object.freeze(sdev);
+    Object.freeze(cov);
+    Object.freeze(cor);
+    Object.freeze(modes);
+    Object.freeze(freq);
+    Object.freeze(toFreq);
+
+    Object.freeze(unifPdf);
+    Object.freeze(unifCdf);
+    Object.freeze(unifInvCdf);
+    Object.freeze(expPdf);
+    Object.freeze(expCdf);
+    Object.freeze(expInvCdf);
+
+    var statistics_lib = /*#__PURE__*/Object.freeze({
+        __proto__: null,
+        debug: statistics_debug,
+        sum: sum$2,
+        mean: mean,
+        variance: variance,
+        sdev: sdev,
+        cov: cov,
+        cor: cor,
+        get modes () { return modes; },
+        freq: freq,
+        toFreq: toFreq,
+        unifPdf: unifPdf,
+        unifCdf: unifCdf,
+        unifInvCdf: unifInvCdf,
+        expPdf: expPdf,
+        expCdf: expCdf,
+        expInvCdf: expInvCdf
+    });
+
+    function frac(num, tolerance = undefined) { //Farey rational approximation algorithm
+    	if (tolerance === undefined) {
+    		tolerance = num * EPSILON;
+    	}
+    	const fractionalPart = num - whole;
+    	let leftNumerator = 0;
+    	let leftDenominator = 1;
+    	let rightNumerator = 1;
+    	let rightDenominator = 1;
+    	let numerator = 1;
+    	let denominator = 2;
+    	let currentValue = numerator / denominator;
+    	while (abs(currentValue - num) > tolerance) {
+    		if (fractionalPart > currentValue) {
+    			leftNumerator = numerator;
+    			leftDenominator = denominator;
+    			numerator += rightNumerator;
+    			denominator += rightDenominator;
+    		} else {
+    			rightNumerator = numerator;
+    			rightDenominator = denominator;
+    			numerator += leftNumerator;
+    			denominator += leftDenominator;
+    		}
+    		currentValue = numerator / denominator;
+    	}
+    	const result = new Int32Array(2);
+    	result[0] = numerator;
+    	result[1] = denominator;
+    	return result;
+    }
+
+    function deriv(f, x) {
+    	x0 = x * (1 + EPSILON);
+    	x1 = x * (1 - EPSILON);
+    	dx = x1 - x0;
+    	return (f(x1) - f(x0)) / dx;
+    }
+
+    //Freeze exports
+    Object.freeze(frac);
+    Object.freeze(deriv);
+
+    var numerical_lib = /*#__PURE__*/Object.freeze({
+        __proto__: null,
+        frac: frac,
+        deriv: deriv
     });
 
     //export * as random from "./random/random.lib.js";
@@ -2291,7 +2799,9 @@ var Mathicall = (function (exports) {
     exports.complex = complex_lib;
     exports.integer = integer_lib;
     exports.matrix = matrix_lib;
+    exports.numerical = numerical_lib;
     exports.standard = standard_lib;
+    exports.statistics = statistics_lib;
     exports.vector = vector_lib;
 
     Object.defineProperty(exports, '__esModule', { value: true });
