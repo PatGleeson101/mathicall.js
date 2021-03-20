@@ -1,27 +1,27 @@
-function zeros(m, n) {
-	const result = new Float64Array(m * n);
-	result.rows = m;
-	result.cols = n;
+function zeros(nrows, ncols) {
+	const result = new Float64Array(nrows * ncols);
+	result.nrows = nrows;
+	result.ncols = ncols;
 	return result;
 }
 
-function constant(m, n, value) {
-	const result = new Float64Array(m * n);
+function constant(nrows, ncols, value) {
+	const result = new Float64Array(nrows * ncols);
 	result.fill(value);
-	result.rows = m;
-	result.cols = n;
+	result.nrows = nrows;
+	result.ncols = ncols;
 	return result;
 }
 
-function identity(m) {
-	const len = m * m;
-	const inc = m + 1;
+function identity(n) {
+	const len = n * n;
+	const inc = n + 1;
 	const result = new Float64Array(len);
 	for (let i = 0; i < len; i += inc) {
 		result[i] = 1;
 	}
-	result.rows = m;
-	result.cols = m;
+	result.nrows = n;
+	result.ncols = n;
 	return result;
 }
 
@@ -44,8 +44,8 @@ function smult(mat, k, target = new Float64Array(mat.length)) {
 	for (let i = 0; i < len; i++) {
 		target[i] = mat[i] * k;
 	}
-	target.rows = mat.rows;
-	target.cols = mat.cols;
+	target.nrows = mat.nrows;
+	target.ncols = mat.ncols;
 	return target;
 }
 
@@ -58,8 +58,8 @@ function transpose2(mat, target = new Float64Array(4)) {
 	const cached = mat[1];
 	target[1] = mat[2];
 	target[2] = cached;
-	target.rows = 2;
-	target.cols = 2;
+	target.nrows = 2;
+	target.ncols = 2;
 	return target;
 }
 
@@ -78,8 +78,8 @@ function transpose3(mat, target = new Float64Array(9)) {
 	cached = mat[5];
 	target[5] = mat[7];
 	target[7] = cached;
-	target.rows = 3;
-	target.cols = 3;
+	target.nrows = 3;
+	target.ncols = 3;
 	return target;
 }
 
@@ -108,20 +108,20 @@ function transpose4(mat, target = new Float64Array(16)) {
 	cached = mat[11];
 	target[11] = mat[14];
 	target[14] = cached;
-	target.rows = 4;
-	target.cols = 4;
+	target.nrows = 4;
+	target.ncols = 4;
 	return target;
 }
 
 //Matrix multiplication
 function mmult(mat1, mat2) { //consider adding target parameter
-	const r1 = mat1.rows;
-	const c1 = mat1.cols;
-	const r2 = mat2.rows;
-	const c2 = mat2.cols;
+	const r1 = mat1.nrows;
+	const c1 = mat1.ncols;
+	const r2 = mat2.nrows;
+	const c2 = mat2.ncols;
 	const target = new Float64Array(r1 * c2);
-	target.rows = r1;
-	target.cols = c2;
+	target.nrows = r1;
+	target.ncols = c2;
 	let value = 0;
 	let x = 0;
 	let y = 0;
@@ -143,7 +143,7 @@ function mmult(mat1, mat2) { //consider adding target parameter
 
 //Size
 function size(mat) {
-	return [mat.rows, mat.cols];
+	return [mat.rnows, mat.ncols];
 }
 
 //Determinant
@@ -164,8 +164,49 @@ function inverse2(mat, target = new Float64Array(4)) {
 	target[3] = a00 * coefficient;
 	target[1] = -a01 * coefficient;
 	target[2] = -a10 * coefficient;
-	target.rows = 2;
-	target.cols = 2;
+	target.nrows = 2;
+	target.ncols = 2;
+	return target;
+}
+
+//Matrix-vector multiplication
+function vmult(vec, mat) { //Premultiply by vector (assumed row-vector)
+	const ncols = mat.ncols;
+	const dimension = vec.length;
+	if (dimension !== mat.nrows) {return undefined;}
+	const target = new Float64Array(ncols);
+	let matIndex = 0;
+	for (let i = 0; i < dimension; i++) {
+		vi = vec[i];
+		for (let j = 0; j < ncols; j++) {
+			target[j] += vi * mat[matIndex++];
+		}
+	}
+	return target; //Result is a vector, not a matrix
+}
+
+function vmult2x2(vec, mat) {
+	const target = new Float64Array(2);
+	const v0 = vec[0];
+	const v1 = vec[1];
+	target[0] = v1 * mat[0] + v2 * mat[2];
+	target[0] = v1 * mat[1] + v2 * mat[3];
+	return target
+}
+
+function multv(mat, vec) {
+	const nrows = mat.nrows;
+	const ncols = mat.ncols;
+	const len = mat.length;
+	if (vec.length !== ncols) {return undefined;}
+	const target = new Float64Array(ncols);
+	for (let j = 0; j < ncols; j++) {
+		vj = vec[j];
+		let k = 0;
+		for (let index = j; index < len; index += ncols) {
+			target[k++] += vj * mat[index];
+		}
+	}
 	return target;
 }
 
@@ -182,6 +223,10 @@ Object.freeze(mmult);
 Object.freeze(size);
 Object.freeze(det2);
 Object.freeze(inverse2);
+Object.freeze(vmult);
+Object.freeze(vmult2x2);
+Object.freeze(multv);
 
 // Export
 export {zeros, constant, identity, flatten, smult, transpose2, transpose3, transpose4, mmult, size, det2, inverse2}
+export {vmult, vmult2x2, multv}
