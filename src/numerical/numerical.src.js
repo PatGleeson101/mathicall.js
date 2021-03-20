@@ -40,3 +40,9 @@ function deriv(f, x) {
 	dx = x1 - x0;
 	return (f(x1) - f(x0)) / dx;
 }
+
+//Freeze exports
+Object.freeze(frac);
+Object.freeze(deriv);
+
+export {frac, deriv}
