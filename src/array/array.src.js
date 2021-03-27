@@ -97,7 +97,7 @@ function unique(arr, sorted = false) {
 		let current = arr[0];
 		let i = 0;
 		while (i < len) {
-			resultBlock[uniqueCount++] = current;
+			uniqueElements[uniqueCount++] = current;
 			previous = current;
 			while (current === previous) {
 				current = arr[i++];
@@ -111,7 +111,7 @@ function unique(arr, sorted = false) {
 			value = arr[i];
 			uniqueElements[value] = value;
 		}
-		return new Float64Array(uniqueElements.values());
+		return new Float64Array(Object.values(uniqueElements));
 	}
 }
 
@@ -170,15 +170,15 @@ function union(arr1, arr2, sorted = false) {
 		let value = 0;
 		for (let i = 0; i < len1; i++) {
 			value = arr1[i];
-			store[value] = value;
+			unionElements[value] = value;
 		}
 		for (let i = 0; i < len2; i++) {
 			value = arr2[i];
-			store[value] = value;
+			unionElements[value] = value;
 		}
-		return new Float64Array(unionElements.values());
+		return new Float64Array(Object.values(unionElements));
 	} else { //Sorted and sufficiently long
-		const result = []
+		const result = [];
 		let i = 0;
 		let j = 0;
 		let val1 = 0;
@@ -201,7 +201,9 @@ function union(arr1, arr2, sorted = false) {
 				}
 				j++
 			} else { //broken
-				result.push(val1);
+				if (val1 !== prev_val1) {
+					result.push(val1);
+				}
 				i++;
 				j++;
 			}
@@ -246,7 +248,7 @@ function sortUint8(arr, target = new Uint8Array(arr.length)) { //Radix sort
 }
 
 function count(arr, value, sorted = false) {
-	const len = set.length;
+	const len = arr.length;
 	let result = 0;
 	if ((!sorted)||(arr.length <= MAX_LINEAR_SEARCH_LENGTH)) { //Unsorted or short array
 		for (let i = 0; i < len; i++) {
@@ -315,18 +317,18 @@ function count(arr, value, sorted = false) {
 				currentIndex = floor(0.5 * (lowerBoundLast + upperBound));
 				currentValue = arr[currentIndex];
 				if (currentValue !== value) {
-					lowerBoundLast = currentIndex;
-				} else {
 					upperBound = currentIndex;
+				} else {
+					lowerBoundLast = currentIndex;
 				}
 			}
 			// Linear search for first occurrence once region becomes small enough
-			while (lowerBoundLast <= upperBound) { 
-				if (arr[lowerBoundLast] === value) {break;}
-				lowerBoundLast++;
+			while (upperBound >= lowerBoundLast) { 
+				if (arr[upperBound] === value) {break;}
+				upperBound--;
 			}
 			//Set result
-			result = lowerBoundLast - lowerBound;
+			result = upperBound - lowerBound + 1;
 		} else {
 			//Initial search ended because bounds got too close together
 			for (let i = lowerBound; i <= upperBound; i++) {

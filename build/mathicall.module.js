@@ -171,7 +171,7 @@ const abs = Math.abs;
 const sign = Math.sign;
 const round = Math.round;
 const trunc = Math.trunc;
-const ceil = Math.ceil;
+const ceil$1 = Math.ceil;
 const floor = Math.floor;
 const sin = Math.sin;
 const asin = Math.asin;
@@ -307,7 +307,7 @@ var standard_lib = /*#__PURE__*/Object.freeze({
     sign: sign,
     round: round,
     trunc: trunc,
-    ceil: ceil,
+    ceil: ceil$1,
     floor: floor,
     sin: sin,
     asin: asin,
@@ -2218,7 +2218,7 @@ function unique(arr, sorted = false) {
 		let current = arr[0];
 		let i = 0;
 		while (i < len) {
-			resultBlock[uniqueCount++] = current;
+			uniqueElements[uniqueCount++] = current;
 			previous = current;
 			while (current === previous) {
 				current = arr[i++];
@@ -2232,7 +2232,7 @@ function unique(arr, sorted = false) {
 			value = arr[i];
 			uniqueElements[value] = value;
 		}
-		return new Float64Array(uniqueElements.values());
+		return new Float64Array(Object.values(uniqueElements));
 	}
 }
 
@@ -2291,13 +2291,13 @@ function union(arr1, arr2, sorted = false) {
 		let value = 0;
 		for (let i = 0; i < len1; i++) {
 			value = arr1[i];
-			store[value] = value;
+			unionElements[value] = value;
 		}
 		for (let i = 0; i < len2; i++) {
 			value = arr2[i];
-			store[value] = value;
+			unionElements[value] = value;
 		}
-		return new Float64Array(unionElements.values());
+		return new Float64Array(Object.values(unionElements));
 	} else { //Sorted and sufficiently long
 		const result = [];
 		let i = 0;
@@ -2322,7 +2322,9 @@ function union(arr1, arr2, sorted = false) {
 				}
 				j++;
 			} else { //broken
-				result.push(val1);
+				if (val1 !== prev_val1) {
+					result.push(val1);
+				}
 				i++;
 				j++;
 			}
@@ -2365,7 +2367,7 @@ function sortUint8(arr, target = new Uint8Array(arr.length)) { //Radix sort
 }
 
 function count(arr, value, sorted = false) {
-	const len = set.length;
+	const len = arr.length;
 	let result = 0;
 	if ((!sorted)||(arr.length <= MAX_LINEAR_SEARCH_LENGTH)) { //Unsorted or short array
 		for (let i = 0; i < len; i++) {
@@ -2434,18 +2436,18 @@ function count(arr, value, sorted = false) {
 				currentIndex = floor(0.5 * (lowerBoundLast + upperBound));
 				currentValue = arr[currentIndex];
 				if (currentValue !== value) {
-					lowerBoundLast = currentIndex;
-				} else {
 					upperBound = currentIndex;
+				} else {
+					lowerBoundLast = currentIndex;
 				}
 			}
 			// Linear search for first occurrence once region becomes small enough
-			while (lowerBoundLast <= upperBound) { 
-				if (arr[lowerBoundLast] === value) {break;}
-				lowerBoundLast++;
+			while (upperBound >= lowerBoundLast) { 
+				if (arr[upperBound] === value) {break;}
+				upperBound--;
 			}
 			//Set result
-			result = lowerBoundLast - lowerBound;
+			result = upperBound - lowerBound + 1;
 		} else {
 			//Initial search ended because bounds got too close together
 			for (let i = lowerBound; i <= upperBound; i++) {
@@ -2787,8 +2789,303 @@ var numerical_lib = /*#__PURE__*/Object.freeze({
     deriv: deriv
 });
 
-//export * as random from "./random/random.lib.js";
+//Constants
+// Ratio-of-uniforms
+const RU_SCALE_CONSTANT = sqrt(2 / E);
+// Park-Miller
+const MCG_A = 48271;
+const MCG_M = 2147483647;
+const MCG_M_PLUS_1 = MCG_M + 1;
+
+//Unseeded random number generation
+// Continuous uniform distribution
+function unif(a = 0, b = 1, count = undefined) { //a>b or b>a
+	if (count === undefined) { //Return single value
+		return a + (b - a) * random();
+	} else { //Return array of values
+		result = new Float64Array(count);
+		for (let i = 0; i < count; i++) {
+			result[i] = a + (b - a) * random();
+		}
+		return result;
+	}
+}
+
+// Uniform integer distribution
+function int(a, b, count = undefined) { //assumes b > a
+	const A = ceil(a);
+	const B = floor(b) + 1;
+	const r = B - A;
+	if (count === undefined) { //Return single value
+		return floor(A + random() * r);
+	} else { //Return array of values
+		const result = new Float64Array(count);
+		for (let i = 0; i < count; i++) {
+			result[i] = floor(A + r * random());
+		}
+		return result;
+	}
+}
+
+// Normal distribution
+function norm(mean, sd, count = undefined) { //Ratio-of-uniforms algorithm
+	if (count === undefined) { //Return single value
+		while (true) {
+			const u1 = random();
+			const v2 = random();
+			const u2 = (2 * v2 - 1) * RU_SCALE_CONSTANT;
+			const x = u2 / u1;
+			if ( (u1 * u1) <= exp(-0.5 * x * x)) {
+				return mean + x * sd;
+			}
+		}
+	} else { //Return array of values
+		const result = new Float64Array(count);
+		let i = 0;
+		while (i < count) {
+			const u1 = random();
+			const v2 = random();
+			const u2 = (2 * v2 - 1) * RU_SCALE_CONSTANT;
+			const x = u2 / u1;
+			if ( (u1 * u1) <= exp(-0.5 * x * x)) {
+				result[i++] = mean + x * sd;
+			}
+		}
+		return result;
+	}
+}
+
+// Exponential distribution
+function exp$1(lambda, count = undefined) {
+	if (count === undefined) { //Return single value
+		return -ln(random()) / lambda;
+	} else { //Return array of values
+		result = new Float64Array(count);
+		for (let i = 0; i < count; i++) {
+			result[i] = -ln(random()) / lambda;
+		}
+		return result;
+	}
+}
+
+//Seeded random number generators
+
+// (Uniform) Multiplicative congruential generator
+function MCG(seed, range = [0, 1]) {
+	let s, a, b, scaleFactor, state; //Declare variables
+	const _seed = function(seed = undefined) {
+		if (seed !== undefined) { //Set new seed and reset state
+			s = floor(abs(seed));
+			state = s;
+		}
+		return s; //Return current seed (whether updated or not)
+	};
+	const _range = function(range = undefined) {
+		if (range !== undefined) { //Set new range
+			a = range[0];
+			b = range[1];
+			scaleFactor = (b - a) / MCG_M_PLUS_1;
+		}
+		return [a, b];
+	};
+	//Initialise variables
+	_seed(seed);
+	_range(range);
+
+	const generator = function(count = undefined) {
+		if (count === undefined) { //Return single value
+			state = (state * MCG_A) % MCG_M;
+			return a + state * scaleFactor;
+		} else { //Return array of values
+			const result = new Float64Array(count);
+			for (let i = 0; i < count; i++) {
+				state = (state * MCG_A) % MCG_M;
+				result[i] = a + state * scaleFactor;
+			}
+			return result;
+		}
+	};
+
+	generator.seed = Object.freeze(_seed);
+	generator.range = Object.freeze(_range);
+	return Object.freeze(generator);
+}
+
+//Xorshift
+function Xorshift32(seed, range = [0, 1]) {
+	const state = new Uint32Array(1);
+	let a, b, scaleFactor;
+	const _seed = function(s = undefined) {
+		if (s !== undefined) { //Set new seed and reset state
+			seed = trunc(s) || 1;
+			state[0] = seed;
+		}
+		return seed; //Return current seed (whether updated or not)
+	};
+	const _range = function(r = undefined) {
+		if (r !== undefined) { //Set new range
+			a = r[0];
+			b = r[1];
+			scaleFactor = (b - a) / 4294967296;
+		}
+		return [a, b];
+	};
+
+	_seed(seed);
+	_range(range);
+
+	const generator = function(count = undefined) {
+		if (count === undefined) { //Return single value
+			state[0] ^= state[0] << 13;
+			state[0] ^= state[0] << 17;
+			state[0] ^= state[0] << 5;
+			return state[0] * scaleFactor;
+		} else { //Return array of values
+			const result = new Float64Array(count);
+			for (let i = 0; i < count; i++) {
+				state[0] ^= state[0] << 13;
+				state[0] ^= state[0] << 17;
+				state[0] ^= state[0] << 5;
+				result[i] = state[0] * scaleFactor;
+			}
+			return result;
+		}
+	};
+
+	generator.seed = Object.freeze(_seed);
+	generator.range = Object.freeze(_range);
+	return Object.freeze(generator);
+}
+
+function RU(seed, mean = 0, sd = 1) { //Ratio of uniforms
+	const urand = Xorshift32(seed+1);
+	//TODO: hash seed instead of just adding 1
+	
+	const generator = function(count = undefined) {
+		if (count === undefined) { //Return single value
+			while (true) {
+				const u1 = urand();
+				const v2 = urand();
+				const u2 = (2 * v2 - 1) * RU_SCALE_CONSTANT;
+				const x = u2 / u1;
+				if ( (u1 * u1) <= exp(-0.5 * x * x)) {
+					return mean + x * sd;
+				}
+			}
+		} else { //Return array of values
+			const result = new Float64Array(count);
+			let i = 0;
+			while (i < count) {
+				const u1 = random();
+				const v2 = random();
+				const u2 = (2 * v2 - 1) * RU_SCALE_CONSTANT;
+				const x = u2 / u1;
+				if ( (u1 * u1) <= exp(-0.5 * x * x)) {
+					result[i++] = mean + x * sd;
+				}
+			}
+			return result;
+		}
+	};
+
+	generator.seed = urand.seed;
+	generator.mean = Object.freeze(mean);
+	generator.sd = Object.freeze(sd);
+
+	return Object.freeze(generator);
+}
+
+const Unif = Xorshift32;
+const Norm = RU;
+
+const Int = function(seed, range = [0, 1]) {
+	const urand = Xorshift32(seed, [ceil(range[0]), floor(range[1]) + 1]);
+
+	const generator = function(count = undefined) {
+		if (count === undefined) { //Return single value
+			return floor(urand());
+		} else { //Return array of values
+			const result = urand(count);
+			for (let i = 0; i < count; i++) {
+				result[i] = floor(result[i]);
+			}
+			return result;
+		}
+	};
+
+	const _range = function(r = undefined) {
+		if (r !== undefined) {
+			urand.range([ceil(r[0]), floor(r[1]) + 1]);
+		}
+		return urand.range();
+	};
+
+	generator.seed = urand.seed;
+	generator.range = Object.freeze(_range);
+
+	return Object.freeze(generator);
+};
+
+// Exponential
+function Exp(seed, lambda = 1) {
+	const urand = Xorshift32(seed);
+
+	const generator = function(count = undefined) {
+		if (count === undefined) { //Return single value
+			return -ln(urand()) / lambda;
+		} else { //Return array of values
+			result = new Float64Array(count);
+			for (let i = 0; i < count; i++) {
+				result[i] = -ln(urand()) / lambda;
+			}
+			return result;
+		}
+	};
+
+	const _lambda = function(l = lambda) {
+		lambda = l;
+		return lambda;
+	};
+
+	generator.seed = urand.seed;
+	generator.lambda = Object.freeze(_lambda);
+
+	return Object.freeze(generator);
+}
+
+// Freeze exports
+Object.freeze(unif);
+Object.freeze(int);
+Object.freeze(norm);
+Object.freeze(exp$1);
+
+Object.freeze(MCG);
+Object.freeze(Xorshift32);
+Object.freeze(RU);
+
+Object.freeze(Unif);
+Object.freeze(Int);
+Object.freeze(Norm);
+Object.freeze(Exp);
+
+//export * as map from "./map/map.lib.js";
+//export * as noise from "./noise/noise.lib.js";
+
+var random_lib = /*#__PURE__*/Object.freeze({
+    __proto__: null,
+    unif: unif,
+    int: int,
+    norm: norm,
+    exp: exp$1,
+    MCG: MCG,
+    Xorshift32: Xorshift32,
+    RU: RU,
+    Unif: Unif,
+    Int: Int,
+    Norm: Norm,
+    Exp: Exp
+});
 
 const VERSION = "beta-3.0.0";
 
-export { VERSION, array_lib as array, complex_lib as complex, integer_lib as integer, matrix_lib as matrix, numerical_lib as numerical, standard_lib as standard, statistics_lib as statistics, vector_lib as vector };
+export { VERSION, array_lib as array, complex_lib as complex, integer_lib as integer, matrix_lib as matrix, numerical_lib as numerical, random_lib as random, standard_lib as standard, statistics_lib as statistics, vector_lib as vector };

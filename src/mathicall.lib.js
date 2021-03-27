@@ -6,6 +6,6 @@ export * as complex from "./complex/complex.lib.js";
 export * as array from "./array/array.lib.js";
 export * as statistics from "./statistics/statistics.lib.js";
 export * as numerical from "./numerical/numerical.lib.js";
-//export * as random from "./random/random.lib.js";
+export * as random from "./random/random.lib.js";
 
 export const VERSION = "beta-3.0.0";
