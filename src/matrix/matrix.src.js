@@ -50,7 +50,7 @@ function smult(mat, k, target = new Float64Array(mat.length)) {
 }
 
 //Transpose
-function transpose2(mat, target = new Float64Array(4)) {
+function transpose2x2(mat, target = new Float64Array(4)) {
 	//Main diagonal
 	target[0] = mat[0];
 	target[3] = mat[3];
@@ -63,7 +63,7 @@ function transpose2(mat, target = new Float64Array(4)) {
 	return target;
 }
 
-function transpose3(mat, target = new Float64Array(9)) {
+function transpose3x3(mat, target = new Float64Array(9)) {
 	//Main diagonal
 	target[0] = mat[0];
 	target[4] = mat[4];
@@ -83,7 +83,7 @@ function transpose3(mat, target = new Float64Array(9)) {
 	return target;
 }
 
-function transpose4(mat, target = new Float64Array(16)) {
+function transpose4x4(mat, target = new Float64Array(16)) {
 	//Main diagonal
 	target[0] = mat[0];
 	target[5] = mat[5];
@@ -147,12 +147,12 @@ function size(mat) {
 }
 
 //Determinant
-function det2(mat) {
+function det2x2(mat) {
 	return mat[0] * mat[3] - mat[1] * mat[2];
 }
 
 //Inverse
-function inverse2(mat, target = new Float64Array(4)) {
+function inverse2x2(mat, target = new Float64Array(4)) {
 	const a00 = mat[0];
 	const a01 = mat[1];
 	const a10 = mat[2];
@@ -216,17 +216,17 @@ Object.freeze(constant);
 Object.freeze(identity);
 Object.freeze(flatten);
 Object.freeze(smult);
-Object.freeze(transpose2);
-Object.freeze(transpose3);
-Object.freeze(transpose4);
+Object.freeze(transpose2x2);
+Object.freeze(transpose3x3);
+Object.freeze(transpose4x4);
 Object.freeze(mmult);
 Object.freeze(size);
-Object.freeze(det2);
-Object.freeze(inverse2);
+Object.freeze(det2x2);
+Object.freeze(inverse2x2);
 Object.freeze(vmult);
 Object.freeze(vmult2x2);
 Object.freeze(multv);
 
 // Export
-export {zeros, constant, identity, flatten, smult, transpose2, transpose3, transpose4, mmult, size, det2, inverse2}
+export {zeros, constant, identity, flatten, smult, transpose2x2, transpose3x3, transpose4x4, mmult, size, det2x2, inverse2x2}
 export {vmult, vmult2x2, multv}

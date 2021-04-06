@@ -1,81 +1,92 @@
-import { assert } from "../../core/core.lib.js";
+import { optional, assert, setContext, clearContext, warnif } from "../../core/core.lib.js";
 import * as src from "./polar.src.js";
 
 function conj(z, target) {
-    const signature = "conj(z, ?target)";
-    //assert.complexTarget
-    assert.polarComplex(z, "z", signature);
+    setContext("conj(z, ?target)", arguments);
+    optional.target('target', 2);
+    assert.polarComplex("z");
+    clearContext();
     return src.conj(z, target);
 }
 
 function real(z) {
-    const signature = "real(z)";
-    assert.polarComplex(z, "z", signature);
+    setContext("real(z)", arguments);
+    assert.polarComplex("z");
+    clearContext();
 	return src.real(z);
 }
 
 function imag(z) {
-    const signature = "imag(z)";
-    assert.polarComplex(z, "z", signature);
+    setContext("imag(z)", arguments);
+    assert.polarComplex("z");
+    clearContext();
 	return src.imag(z);
 }
 
 function arg(z) {
-    const signature = "arg(z)";
-    assert.polarComplex(z, "z", signature);
+    setContext("arg(z)", arguments);
+    assert.polarComplex("z");
+    clearContext();
 	return src.arg(z);
 }
 
 function abs(z) {
-    const signature = "abs(z)";
-    assert.polarComplex(z, "z", signature);
+    setContext("abs(z)", arguments);
+    assert.polarComplex("z");
+    clearContext();
 	return src.abs(z);
 }
 
 function smult(z, k, target) {
-    const signature = "smult(z, k, ?target)";
-	assert.polarComplex(z, "z", signature);
-    assert.realNumber(k, "k", signature)
-    //assert.target...
+    setContext("smult(z, k, ?target)", arguments);
+	assert.polarComplex("z");
+    assert.realNumber("k");
+    optional.target('target', 2);
+    clearContext();
     return src.smult(z, k, target);
 }
 
 function cmult(z1, z2, target) {
-	const signature = "cmult(z1, z2, ?target)";
-	assert.polarComplex(z1, "z1", signature);
-    assert.polarComplex(z2, "z2", signature);
-    //assert.target...
+	setContext("cmult(z1, z2, ?target)", arguments);
+	assert.polarComplex("z1");
+    assert.polarComplex("z2");
+    optional.target('target', 2);
     return src.cmult(z1, z2, target);
 }
 
 function div(z1, z2, target) {
-	const signature = "div(z1, z2, ?target)";
-	assert.polarComplex(z1, "z1", signature);
-    assert.polarComplex(z2, "z2", signature);
-    //assert.target...
-    return src.div(z1, z2, target);
-    //warn.notDefined
+	setContext("div(z1, z2, ?target)", arguments);
+	assert.polarComplex("z1");
+    assert.polarComplex("z2");
+    optional.target('target', 2);
+    const result = src.div(z1, z2, target);
+    warnif.notDefined(result);
+    clearContext();
+    return result;
 }
 
 function pow(z, n, target) {
-	const signature = "pow(z, n, ?target)";
-    assert.polarComplex(z, "z", signature);
-    assert.realNumber(n, "n", signature);
-    //assert.target...
+	setContext("pow(z, n, ?target)", arguments);
+    assert.polarComplex("z");
+    assert.realNumber("n");
+    optional.target('target', 2);
+    clearContext();
     return src.pow(z, n, target);
 }
 
 function inverse(z, target) {
-	const signature = "inverse(z, ?target)";
-    assert.polarComplex(z, "z", signature);
-    //assert.target...
+	setContext("inverse(z, ?target)", arguments);
+    assert.polarComplex("z");
+    optional.target('target', 2);
+    clearContext();
     return src.inverse(z, target);
 }
 
 function rect(z, target) {
-	const signature = "rect(z, ?target)";
-    assert.polarComplex(z, "z", signature);
-    //assert.target...
+	setContext("rect(z, ?target)", arguments);
+    assert.polarComplex("z");
+    optional.target('target', 2);
+    clearContext();
     return src.rect(z, target);
 }
 

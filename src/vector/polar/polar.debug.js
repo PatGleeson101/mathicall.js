@@ -1,42 +1,43 @@
 import * as src from "./polar.src.js";
-import {assert} from "../../core/core.lib.js";
+import {assert, clearContext, optional} from "../../core/core.lib.js";
 
 function dot2(vec1, vec2) {
-	const signature = "dot2(vec1, vec2)";
-	assert.realArray(vec1, "vec1", signature);
-	assert.realArray(vec2, "vec2", signature);
-	//need to assert array sizes too
+	setContext("dot2(vec1, vec2)", arguments);
+	assert.realArray("vec1", 2);
+	assert.realArray("vec2", 2);
+	clearContext();
 	return src.dot2(vec1, vec2);
 }
 
 function mag(vec) {
-	const signature = "mag(vec)";
-	assert.realArray(vec, "vec", signature);
+	setContext("mag(vec)", arguments);
+	assert.realArray("vec");
+	clearContext();
 	return src.mag(vec);
 }
 
 function smult2(vec, k, target) {
-	const signature = "smult2(vec, k, ?target)";
-	assert.realArray(vec, "vec", signature);
-	assert.realNumber(k, "k", signature);
-	//assert array size
-	//assert target
+	setContext("smult2(vec, k, ?target)", arguments);
+	assert.realArray("vec", 2);
+	assert.realNumber("k");
+	optional.target('target', 2);
+	clearContext();
 	return src.smult2(vec, k, target);
 }
 
 function normalize2(vec, target) {
-	const signature = "normalize2(vec, ?target)";
-	assert.realArray(vec, "vec", signature);
-	//assert array size
-	//assert target
+	setContext("normalize2(vec, ?target)", arguments);
+	assert.realArray("vec", 2);
+	optional.target('target', 2);
+	clearContext();
 	return src.normalize2(vec, target);
 }
 
 function rect2(vec, target) {
-	const signature = "rect2(vec, ?target)";
-	assert.realArray(vec, "vec", signature);
-	//assert array size
-	//assert target
+	setContext("rect2(vec, ?target)", arguments);
+	assert.realArray("vec", 2);
+	optional.target('target', 2);
+	clearContext();
 	return src.rect2(vec, target);
 }
 

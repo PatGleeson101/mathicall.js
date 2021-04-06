@@ -1,130 +1,188 @@
 var Mathicall = (function (exports) {
     'use strict';
 
+    // Current debug context
+    let signature = "Unknown";
+    let args = {};
+
+    function setContext$1(s, argArray) {
+        //Parse signature
+        signature = s;
+        const parameters = signature
+        .split("(")[1]
+        .replace(")", "")
+        .replace(" ", "")
+        .replace("?", "")
+        .split(",");
+        //Parse arguments
+        args = {};
+        for (let i = 0; i < parameters.length; i++) {
+            args[params[i]] = argArray[i];
+        }
+    }
+
+    function clearContext() {
+        args = {};
+        signature = "Unknown";
+    }
+
+    // Shorter console use
+    function log() {
+        console.log.apply(console, arguments);
+    }
+
+    function warn() {
+        console.warn.apply(console, arguments);
+    }
+
+    /*
+    // Type checking
+    function isRealNumber() {
+
+    }
+
+    function isRealArray() {
+
+    }
+
+    function isString(s) {
+        return (typeof s === 'string' || s instanceof String);
+    }
+    */
+
+    //Freeze exports
+    Object.freeze(log);
+    Object.freeze(setContext$1);
+    Object.freeze(clearContext);
+    Object.freeze(warn);
+
     const TYPED_ARRAY_CONSTRUCTORS = [
         Int8Array, Uint8Array, Uint8ClampedArray,
         Int16Array, Uint16Array, Int32Array, Uint32Array,
         Float32Array, Float64Array];
 
-    function realNumber(value, label, signature) {
+    function realNumber(parameter) {
+        const value = args[parameter];
         if (value.constructor !== Number) { //Assert type Number
-            throw `${signature}: ${label} must be of type Number.`;
+            throw `${signature}: ${parameter} must be of type Number.`;
         }
     	if (!isFinite(value)) { //Exclude Infinity and NaN
-            throw `${signature}: ${label} cannot be NaN or Infinity.`;
+            throw `${signature}: ${parameter} cannot be NaN or Infinity.`;
         }
     }
 
-    function realArray(value, label, signature) {
-        if (TYPED_ARRAY_CONSTRUCTORS.includes(value.constructor)) {return;}
-        if (Array.isArray(value)) {
+    function realArray(parameter, length) {
+        const value = args[parameter];
+        if (TYPED_ARRAY_CONSTRUCTORS.includes(value.constructor) || Array.isArray(value)) {
             const len = value.length;
+            if (len !== length) {
+                throw `${signature}: ${parameter} has incorrect length`;
+            }
             if (len === 0) {
-                console.warn(`${signature}: ${label} is empty.`);
+                warn(`${signature}: ${parameter} is empty.`);
             }
             for (let i = 0; i < len; i++) {
     			const x = value[i];
                 if (value.constructor !== Number) { //Assert type Number
-                    throw `${signature}: ${label} must an array of Numbers.`;
+                    throw `${signature}: ${parameter} must an array of Numbers.`;
                 }
                 if (!isFinite(value)) { //Exclude Infinity and NaN
-                    throw `${signature}: ${label} contains NaN or Infinity.`;
+                    throw `${signature}: ${parameter} contains NaN or Infinity.`;
                 }
             }
         }
-        throw `${signature}: ${label} must be an Array or TypedArray.`;
+        throw `${signature}: ${parameter} must be an Array or TypedArray.`;
     }
 
-    function integer(value, label, signature) {
+    function integer(parameter) {
+        const value = args[parameter];
         if (!Number.isInteger(value)) {
-            throw `${signature}: ${label} must be an integer of type Number.`;
+            throw `${signature}: ${parameter} must be an integer of type Number.`;
         }
     }
 
-    function positive(value, label, signature) {
-        realNumber(value, label, signature);
+    function positive(parameter) {
+        const value = args[parameter];
+        realNumber(parameter);
         if (value <= 0) {
-            throw `${signature}: ${label} must be positive.`;
+            throw `${signature}: ${parameter} must be positive.`;
         }
     }
 
-    function nonNegative(value, label, signature) {
-        realNumber(value, label, signature);
+    function nonNegative(parameter) {
+        const value = args[parameter];
+        realNumber(parameter);
         if (value < 0) {
-            throw `${signature}: ${label} must be non-negative.`;
+            throw `${signature}: ${parameter} must be non-negative.`;
         }
     }
 
-    function rectVector(value, label, signature) {
-        realArray(value, label, signature);
+    function rectVector(parameter) {
+        realArray(parameter);
     }
 
-    function polarVector(value, label, signature) {
-        realArray(value, label, signature);
+    function polarVector(parameter) {
+        const value = args[parameter];
+        realArray(parameter);
         if (value[0] < 0) {
-            console.warn(`${signature}: ${label} expressed with negative magnitude.`);
+            console.warn(`${signature}: ${parameter} expressed with negative magnitude.`);
         }
     }
 
-    function bool(value, label, signature) {
+    function bool(parameter) {
+        const value = args[parameter];
         if ( (value !== true) && (value !== false) ) {
-            throw `${signature}: ${label} must be a boolean value.`;
+            throw `${signature}: ${parameter} must be a boolean value.`;
         }
     }
 
-    function ifSorted(arr, sorted, label, signature) {
-        if (sorted) {
-            const len = arr.length;
-            if (arr[len-1] > arr[0]) { //Ascending
-                for (let i = 1; i < len; i++) {
-                    if (arr[i] < arr[i-1]) {
-                        throw `${signature}: sorted set to true but ${label} is unsorted`;
-                    }
-                }
-            } else { //Descending
-                for (let i = 1; i < len; i++) {
-                    if (arr[i] > arr[i-1]) {
-                        throw `${signature}: sorted set to true but ${label} is unsorted`;
-                    }
-                }
-            }
-        }
-    }
-
-    function polarComplex(value, label, signature) {
-        realArray(value, label, signature);
+    function polarComplex(parameter) {
+        const value = args[parameter];
+        realArray(parameter);
         const len = value.length;
         if (len < 2) {
-            throw `${signature}: ${label} must have two components.`;
+            throw `${signature}: ${parameter} must have two components.`;
         }
         if (len > 2) {
-            console.warn(`${signature}: ${label} contains additional values which will be ignored.`);
+            console.warn(`${signature}: ${parameter} contains additional values which will be ignored.`);
         }
         if (value[0] < 0) {
-            console.warn(`${signature}: ${label} expressed with negative magnitude.`);
+            console.warn(`${signature}: ${parameter} expressed with negative magnitude.`);
         }
     }
 
-    function rectComplex(value, label, signature) {
-        realArray(value, label, signature);
+    function rectComplex(parameter) {
+        const value = args[parameter];
+        realArray(parameter);
         const len = value.length;
         if (len < 2) {
-            throw `${signature}: ${label} must have two components.`;
+            throw `${signature}: ${parameter} must have two components.`;
         }
         if (len > 2) {
-            console.warn(`${signature}: ${label} contains additional values which will be ignored.`);
+            console.warn(`${signature}: ${parameter} contains additional values which will be ignored.`);
         }
     }
 
-    function positiveInteger(value, label, signature) {
-        integer(value, label, signature);
-        positive(value, label, signature);
+    function positiveInteger(parameter) {
+        integer(parameter);
+        positive(parameter);
     }
 
-    function flatMatrix(value, label, signature) {
-        realArray(value, label, signature);
-        positiveInteger(value.rows, `${label}.rows`, signature);
-        positiveInteger(value.cols, `${label}.cols`, signature);
+    function flatMatrix(parameter, nrows, ncols) {
+        realArray(parameter);
+        const value = args[parameter];
+        if ( (!Number.isInteger(value.nrows)) || (value.nrows < 1) ) {
+            throw `${signature}: ${parameter}.nrows is invalid`;
+        }
+        if ((!Number.isInteger(value.ncols)) || (value.ncols < 1)) {
+            throw `${signature}: ${parameter}.ncols is invalid`;
+        }
+        if (value.nrows * value.ncols !== value.length) {
+            throw `${signature}: ${parameter}.length does not match ${parameter}.nrows * ${parameter}.ncols`;
+        }
+        if ( (value.nrows !== nrows) || (value.ncols !== ncols) ) {
+            throw `${signature}: ${parameter} has incorrect dimensions`;
+        }
     }
 
     //Freeze exports
@@ -136,27 +194,82 @@ var Mathicall = (function (exports) {
     Object.freeze(rectVector);
     Object.freeze(polarVector);
     Object.freeze(bool);
-    Object.freeze(ifSorted);
     Object.freeze(polarComplex);
     Object.freeze(rectComplex);
     Object.freeze(flatMatrix);
     Object.freeze(positiveInteger);
 
-    function realOverflow(result, signature) { //Assumes 'result' is a number
-        if (result === MAX_VALUE) {
-            console.warn(`${signature} overflow: returned Number.MAX_VALUE`);
+    function realOverflow(value) { //Assumes 'value' is a number
+        if (value >= MAX_VALUE) {
+            warn(`${signature}: overflowed Number.MAX_VALUE`);
         }
     }
 
-    function intOverflow(result, signature) { //Assumes 'result' is a number
-        if (result > MAX_SAFE_INTEGER) {
-            console.warn(`${signature} integer overflow: returned value is approximate.`);
+    function intOverflow(value) { //Assumes 'value' is a number
+        if (value > MAX_SAFE_INTEGER) {
+            warn(`${signature}: overflowed Number.MAX_SAFE_INTEGER`);
+        }
+    }
+
+    function notDefined(value) {
+        if (value === undefined) {
+            warn(`${signature}: output undefined`);
         }
     }
 
     //Freeze exports
     Object.freeze(realOverflow);
     Object.freeze(intOverflow);
+    Object.freeze(notDefined);
+
+    function sorted(arrLabel, sortedLabel) {
+        const arr = args[arrLabel];
+        const sorted = args[sortedLabel];
+        const len = arr.length;
+        if (len === 0) {return;}
+        if (sorted === true) {
+            sgn = Math.sign(arr[len - 1] - arr[0]);
+            for (let i = 1; i < len; i++) {
+                const s = Math.sign(arr[i] - arr[i-1]);
+                if ( (s !== 0) && (s !== sgn)) {
+                    throw `${signature}: ${sortedLabel} set to true, but ${arrLabel} unsorted`;
+                }
+            }
+        }
+    }
+
+    function realNumber$1(label) {
+        const value = args[label];
+        if (value === undefined) {return;}
+        if (value.constructor !== Number) { //Assert type Number
+            throw `${signature}: If provided, ${label} must be of type Number.`;
+        }
+    	if (!isFinite(value)) { //Exclude Infinity and NaN
+            throw `${signature}: ${label} cannot be NaN or Infinity.`;
+        }
+    }
+
+    function target(label, length) {
+        const value = args[label];
+        if (value === undefined) {return;}
+        realArray(value);
+        if (value.length !== length) {
+            throw `${signature}: ${label} has incorrect length`
+        }
+    }
+
+    function bool$1(label) {
+        const value = args[label];
+        if (value === undefined) {return;}
+        if ((value !== true) && (value !== false)) {
+            throw `${signature}: ${label} must be a boolean`
+        }
+    }
+
+    Object.freeze(realNumber$1);
+    Object.freeze(sorted);
+    Object.freeze(target);
+    Object.freeze(bool$1);
 
     //Math constants
     const E = Math.E;
@@ -174,7 +287,7 @@ var Mathicall = (function (exports) {
     const sign = Math.sign;
     const round = Math.round;
     const trunc = Math.trunc;
-    const ceil$1 = Math.ceil;
+    const ceil = Math.ceil;
     const floor = Math.floor;
     const sin = Math.sin;
     const asin = Math.asin;
@@ -238,43 +351,55 @@ var Mathicall = (function (exports) {
     Object.freeze(linmap);
 
     function lerp$1(x, y, r) {
-    	const signature = "lerp(x, y, r)";
-    	realNumber(x, "x", signature);
-    	realNumber(y, "y", signature);
-    	realNumber(r, "r", signature);
+    	setContext("lerp(x, y, r)", arguments);
+    	realNumber("x");
+    	realNumber("y");
+    	realNumber("r");
+    	clearContext();
     	return lerp(x, y, r);
     }
 
     function mod$1(x, m) {
-    	const signature = "mod(x, m)";
-    	realNumber(x, "x", signature);
-    	realNumber(m, "m", signature);
+    	setContext("mod(x, m)", arguments);
+    	realNumber("x");
+    	realNumber("m");
+    	clearContext();
     	return mod(x, m);
     }
 
     function fract$1(x) {
-    	const signature = "fract(x)";
-    	realNumber(x, "x", signature);
+    	setContext("fract(x)", arguments);
+    	realNumber("x");
+    	clearContext();
     	return fract(x);
     }
 
     function deg$1(radians) {
-    	const signature = "deg(radians)";
-    	realNumber(radians, "radians", signature);
+    	setContext("deg(radians)", arguments);
+    	realNumber("radians");
+    	clearContext();
     	return deg(radians);
     }
 
     function rad$1(degrees) {
-    	const signature = "rad(degrees)";
-    	realNumber(degrees, "degrees", signature);
+    	setContext("rad(degrees)", arguments);
+    	realNumber('degrees');
+    	clearContext();
     	return rad(degrees);
     }
 
     function linmap$1(x, domain, range) {
-    	const signature = "linmap(x, domain, range)";
-    	realNumber(x, "x", signature);
-    	//assert domain
-    	//assert range
+    	setContext("linmap(x, domain, range)", arguments);
+    	realNumber("x");
+    	realArray('domain');
+    	realArray('range');
+    	if (domain[0] > domain[1]) {
+    		throw "linmap(x, domain, range): invalid domain"
+    	}
+    	if (range[0] > range[1]) {
+    		throw "linmap(x, domain, range): invalid range"
+    	}
+    	clearContext();
     	return linmap(x, domain, range);
     }
 
@@ -310,7 +435,7 @@ var Mathicall = (function (exports) {
         sign: sign,
         round: round,
         trunc: trunc,
-        ceil: ceil$1,
+        ceil: ceil,
         floor: floor,
         sin: sin,
         asin: asin,
@@ -499,55 +624,61 @@ var Mathicall = (function (exports) {
     Object.freeze(mpow);
 
     function factorial$1(n) {
-    	const signature = "factorial(n)";
-    	integer(n, "n", signature);
-    	nonNegative(n, "n", signature);
+    	setContext$1("factorial(n)", arguments);
+    	integer("n");
+    	nonNegative("n");
     	const result = factorial(n);
-    	realOverflow(result, signature);
-    	intOverflow(result, signature);
+    	realOverflow(result);
+    	intOverflow(result);
+    	clearContext();
     	return result;
     }
 
     function choose$1(n, r) {
-    	const signature = "choose(n, r)";
-    	integer(n, "n", signature);
-    	integer(r, "r", signature);
+    	setContext$1("choose(n, r)", arguments);
+    	integer("n");
+    	integer("r");
     	const result = choose(n, r);
-    	realOverflow(result, signature);
-    	intOverflow(result, signature);
+    	realOverflow(result);
+    	intOverflow(result);
+    	clearContext();
     	return result;
     }
 
     function permute$1(n, r) {
-    	const signature = "permute(n, r)";
-    	integer(n, "n", signature);
-    	integer(r, "r", signature);
+    	setContext$1("permute(n, r)", arguments);
+    	integer("n");
+    	integer("r");
     	const result = permute(n, r);
-    	realOverflow(result, signature);
-    	intOverflow(result, signature);
+    	realOverflow(result);
+    	intOverflow(result);
+    	clearContext();
     	return result;
     }
 
     function gcd$1(a, b) {
-    	const signature = "gcd(a, b)";
-    	integer(a, "a", signature);
-    	integer(b, "b", signature);
+    	setContext$1("gcd(a, b)", arguments);
+    	integer("a");
+    	integer("b");
+    	clearContext();
     	return gcd(a, b);
     }
 
     function lcm$1(a, b) {
-    	const signature = "lcm(a, b)";
-    	integer(a, "a", signature);
-    	integer(b, "b", signature);
+    	setContext$1("lcm(a, b)", arguments);
+    	integer("a");
+    	integer("b");
+    	clearContext();
     	return lcm(a, b);
     }
 
     function mpow$1(base, exp, m) {
-    	const signature = "mpow(base, exp, m)";
-    	integer(base, "base", signature);
-    	integer(exp, "exp", signature);
-    	nonNegative(exp, "exp", signature);
-    	integer(m, "m", signature);
+    	setContext$1("mpow(base, exp, m)", arguments);
+    	integer("base");
+    	integer("exp");
+    	nonNegative("exp");
+    	integer("m");
+    	clearContext();
     	return mpow(base, exp, m);
     }
 
@@ -826,287 +957,274 @@ var Mathicall = (function (exports) {
 
     //Dot product
     function dot$1(vec1, vec2) {
-    	const signature = "dot(vec1, vec2)";
-    	realArray(vec1, "vec1", signature);
-    	realArray(vec2, "vec2", signature);
-    	// warn/assert size match
+    	setContext$1("dot(vec1, vec2)", arguments);
+    	realArray("vec1");
+    	realArray("vec2", vec1.length);
+    	clearContext();
     	return dot(vec1, vec2);
     }
 
     function dot2$1(vec1, vec2) {
-    	const signature = "dot2(vec1, vec2)";
-    	realArray(vec1, "vec1", signature);
-    	realArray(vec2, "vec2", signature);
-    	// warn/assert array sizes
+    	setContext$1("dot2(vec1, vec2)", arguments);
+    	realArray("vec1", 2);
+    	realArray("vec2", 2);
+    	clearContext();
     	return dot2(vec1, vec2);
     }
 
     function dot3$1(vec1, vec2) {
-    	const signature = "dot3(vec1, vec2)";
-    	realArray(vec1, "vec1", signature);
-    	realArray(vec2, "vec2", signature);
-    	// warn/assert array sizes
+    	setContext$1("dot3(vec1, vec2)", arguments);
+    	realArray("vec1", 3);
+    	realArray("vec2", 3);
+    	clearContext();
     	return dot3(vec1, vec2);
     }
 
     function dot4$1(vec1, vec2) {
-    	const signature = "dot4(vec1, vec2)";
-    	realArray(vec1, "vec1", signature);
-    	realArray(vec2, "vec2", signature);
-    	// warn/assert array sizes
+    	setContext$1("dot4(vec1, vec2)", arguments);
+    	realArray("vec1", 4);
+    	realArray("vec2", 4);
+    	clearContext();
     	return dot4(vec1, vec2);
     }
 
     //Cross product
-    function cross3$1(vec1, vec2, target) {
-    	const signature = "cross3(vec1, vec2, ?target)";
-    	realArray(vec1, "vec1", signature);
-    	realArray(vec2, "vec2", signature);
-    	// warn/assert array sizes
-    	//assert target
-    	return cross3(vec1, vec2, target);
+    function cross3$1(vec1, vec2, target$1) {
+    	setContext$1("cross3(vec1, vec2, ?target)", arguments);
+    	realArray("vec1", 3);
+    	realArray("vec2", 3);
+    	target('target', 3);
+    	clearContext();
+    	return cross3(vec1, vec2, target$1);
     }
 
     //Addition
-    function add$1(vec1, vec2, target) {
-    	const signature = "add(vec1, vec2, ?target)";
-    	realArray(vec1, "vec1", signature);
-    	realArray(vec2, "vec2", signature);
-    	// warn/assert array size match
-    	//assert target
-    	return add(vec1, vec2, target);
+    function add$1(vec1, vec2, target$1) {
+    	setContext$1("add(vec1, vec2, ?target)", arguments);
+    	realArray("vec1");
+    	realArray("vec2", vec1.length);
+    	target('target', vec1.length);
+    	clearContext();
+    	return add(vec1, vec2, target$1);
     }
 
-    function add2$1(vec1, vec2, target) {
-    	const signature = "add2(vec1, vec2, ?target)";
-    	realArray(vec1, "vec1", signature);
-    	realArray(vec2, "vec2", signature);
-    	// warn/assert array sizes
-    	//assert target
-    	return add2(vec1, vec2, target);
+    function add2$1(vec1, vec2, target$1) {
+    	setContext$1("add2(vec1, vec2, ?target)", arguments);
+    	realArray("vec1", 2);
+    	realArray("vec2", 2);
+    	target('target', 2);
+    	clearContext();
+    	return add2(vec1, vec2, target$1);
     }
 
-    function add3$1(vec1, vec2, target) {
-    	const signature = "add3(vec1, vec2, ?target)";
-    	realArray(vec1, "vec1", signature);
-    	realArray(vec2, "vec2", signature);
-    	// warn/assert array sizes
-    	//assert target
-    	return add3(vec1, vec2, target);
+    function add3$1(vec1, vec2, target$1) {
+    	setContext$1("add3(vec1, vec2, ?target)", arguments);
+    	realArray("vec1", 3);
+    	realArray("vec2", 3);
+    	target('target', 3);
+    	clearContext();
+    	return add3(vec1, vec2, target$1);
     }
 
-    function add4$1(vec1, vec2, target) {
-    	const signature = "add4(vec1, vec2, ?target)";
-    	realArray(vec1, "vec1", signature);
-    	realArray(vec2, "vec2", signature);
-    	// warn/assert array sizes
-    	//assert target
-    	return add4(vec1, vec2, target);
+    function add4$1(vec1, vec2, target$1) {
+    	setContext$1("add4(vec1, vec2, ?target)", arguments);
+    	realArray("vec1", 4);
+    	realArray("vec2", 4);
+    	target('target', 4);
+    	clearContext();
+    	return add4(vec1, vec2, target$1);
     }
 
     //Subtraction
-    function sub$1(vec1, vec2, target) {
-    	const signature = "sub(vec1, vec2, ?target)";
-    	realArray(vec1, "vec1", signature);
-    	realArray(vec2, "vec2", signature);
-    	// warn/assert array sizes
-    	//assert target
-    	return sub(vec1, vec2, target);
+    function sub$1(vec1, vec2, target$1) {
+    	setContext$1("sub(vec1, vec2, ?target)", arguments);
+    	realArray("vec1", 2);
+    	realArray("vec2", vec1.length);
+    	target('target', vec1.length);
+    	clearContext();
+    	return sub(vec1, vec2, target$1);
     }
 
-    function sub2$1(vec1, vec2, target) {
-    	const signature = "sub2(vec1, vec2, ?target)";
-    	realArray(vec1, "vec1", signature);
-    	realArray(vec2, "vec2", signature);
-    	// warn/assert array sizes
-    	//assert target
-    	return sub2(vec1, vec2, target);
+    function sub2$1(vec1, vec2, target$1) {
+    	setContext$1("sub2(vec1, vec2, ?target)", arguments);
+    	realArray("vec1", 2);
+    	realArray("vec2", 2);
+    	target('target', 2);
+    	clearContext();
+    	return sub2(vec1, vec2, target$1);
     }
 
-    function sub3$1(vec1, vec2, target) {
-    	const signature = "sub3(vec1, vec2, ?target)";
-    	realArray(vec1, "vec1", signature);
-    	realArray(vec2, "vec2", signature);
-    	// warn/assert array sizes
-    	//assert target
-    	return sub3(vec1, vec2, target);
+    function sub3$1(vec1, vec2, target$1) {
+    	setContext$1("sub3(vec1, vec2, ?target)", arguments);
+    	realArray("vec1", 3);
+    	realArray("vec2", 3);
+    	target('target', 3);
+    	clearContext();
+    	return sub3(vec1, vec2, target$1);
     }
 
-    function sub4$1(vec1, vec2, target) {
-    	const signature = "sub4(vec1, vec2, ?target)";
-    	realArray(vec1, "vec1", signature);
-    	realArray(vec2, "vec2", signature);
-    	// warn/assert array sizes
-    	//assert target
-    	return sub4(vec1, vec2, target);
+    function sub4$1(vec1, vec2, target$1) {
+    	setContext$1("sub4(vec1, vec2, ?target)", arguments);
+    	realArray("vec1", 4);
+    	realArray("vec2", 4);
+    	target('target', 4);
+    	clearContext();
+    	return sub4(vec1, vec2, target$1);
     }
 
     //Magnitude
     function mag$1(vec) {
-    	const signature = "mag(vec)";
-    	realArray(vec, "vec", signature);
+    	setContext$1("mag(vec)", arguments);
+    	realArray("vec");
+    	clearContext();
     	return mag(vec);
     }
 
     function mag2$1(vec) {
-    	const signature = "mag2(vec)";
-    	realArray(vec, "vec", signature);
-    	//warn array size
+    	setContext$1("mag2(vec)", arguments);
+    	realArray("vec", 2);
+    	clearContext();
     	return mag2(vec);
     }
 
     function mag3$1(vec) {
-    	const signature = "mag3(vec)";
-    	realArray(vec, "vec", signature);
-    	//warn array size
+    	setContext$1("mag3(vec)", arguments);
+    	realArray("vec", 3);
+    	clearContext();
     	return mag3(vec);
     }
 
     function mag4$1(vec) {
-    	const signature = "mag4(vec)";
-    	realArray(vec, "vec", signature);
-    	//warn array size
+    	setContext$1("mag4(vec)", arguments);
+    	realArray("vec", 4);
+    	clearContext();
     	return mag4(vec);
     }
 
     //Scaling
-    function smult$1(vec, k, target) {
-    	const signature = "smult(vec, k, ?target)";
-    	realArray(vec, "vec", signature);
-    	realNumber(k, "k", signature);
-    	//assert target
-    	return smult(vec, k, target);
+    function smult$1(vec, k, target$1) {
+    	setContext$1("smult(vec, k, ?target)", arguments);
+    	realArray("vec");
+    	realNumber("k");
+    	target('target', vec.length);
+    	return smult(vec, k, target$1);
     }
 
-    function smult2$1(vec, k, target) {
-    	const signature = "smult2(vec, k, ?target)";
-    	realArray(vec, "vec", signature);
-    	realNumber(k, "k", signature);
-    	//assert target
-    	// warn vec size
-    	return smult2(vec, k, target);
+    function smult2$1(vec, k, target$1) {
+    	setContext$1("smult2(vec, k, ?target)", arguments);
+    	realArray("vec", 2);
+    	realNumber("k");
+    	target('target', 2);
+    	return smult2(vec, k, target$1);
     }
 
-    function smult3$1(vec, k, target) {
-    	const signature = "smult3(vec, k, ?target)";
-    	realArray(vec, "vec", signature);
-    	realNumber(k, "k", signature);
-    	//assert target
-    	// warn vec size
-    	return smult3(vec, k, target);
+    function smult3$1(vec, k, target$1) {
+    	setContext$1("smult3(vec, k, ?target)", arguments);
+    	realArray("vec", 3);
+    	realNumber("k");
+    	target('target', 3);
+    	return smult3(vec, k, target$1);
     }
 
-    function smult4$1(vec, k, target) {
-    	const signature = "smult4(vec, k, ?target)";
-    	realArray(vec, "vec", signature);
-    	realNumber(k, "k", signature);
-    	//assert target
-    	// warn vec size
-    	return smult4(vec, k, target);
+    function smult4$1(vec, k, target$1) {
+    	setContext$1("smult4(vec, k, ?target)", arguments);
+    	realArray("vec", 4);
+    	realNumber("k");
+    	target('target', 4);
+    	return smult4(vec, k, target$1);
     }
 
-    function normalize$1(vec, target) { //'target' intentionally defaults to undefined
-    	const signature = "normalize(vec, ?target)";
-    	realArray(vec, "vec", signature);
-    	//assert target
-    	return normalize(vec, target);
+    function normalize$1(vec, target$1) { //'target' intentionally defaults to undefined
+    	setContext$1("normalize(vec, ?target)", arguments);
+    	realArray("vec");
+    	target('target', vec.length);
+    	return normalize(vec, target$1);
     }
 
-    function normalize2$1(vec, target) {
-    	const signature = "normalize2(vec, ?target)";
-    	realArray(vec, "vec", signature);
-    	//assert target
-    	//warn array size
-    	return normalize2(vec, target);
+    function normalize2$1(vec, target$1) {
+    	setContext$1("normalize2(vec, ?target)", arguments);
+    	realArray("vec", 2);
+    	target('target', 2);
+    	return normalize2(vec, target$1);
     }
 
-    function normalize3$1(vec, target) {
-    	const signature = "normalize3(vec, ?target)";
-    	realArray(vec, "vec", signature);
-    	//assert target
-    	//warn array size
-    	return normalize3(vec, target);
+    function normalize3$1(vec, target$1) {
+    	setContext$1("normalize3(vec, ?target)", arguments);
+    	realArray("vec", 3);
+    	target('target', 3);
+    	return normalize3(vec, target$1);
     }
 
-    function normalize4$1(vec, target) {
-    	const signature = "normalize4(vec, ?target)";
-    	realArray(vec, "vec", signature);
-    	//assert target
-    	//warn array size
-    	return normalize4(vec, target);
+    function normalize4$1(vec, target$1) {
+    	setContext$1("normalize4(vec, ?target)", arguments);
+    	realArray("vec", 4);
+    	target('target', 4);
+    	return normalize4(vec, target$1);
     }
 
     //Angles & rotations
     function angle$1(vec1, vec2) {
-    	const signature = "angle(vec1, vec2)";
-    	realArray(vec1, "vec1", signature);
-    	realArray(vec2, "vec2", signature);
-    	// warn/assert array size match
+    	setContext$1("angle(vec1, vec2)", arguments);
+    	realArray("vec1");
+    	realArray("vec2", vec1.length);
     	return angle(vec1, vec2);
     }
 
     function angle2$1(vec1, vec2) {
-    	const signature = "angle2(vec1, vec2)";
-    	realArray(vec1, "vec1", signature);
-    	realArray(vec2, "vec2", signature);
-    	// warn/assert array sizes
+    	setContext$1("angle2(vec1, vec2)", arguments);
+    	realArray("vec1", 2);
+    	realArray("vec2", 2);
     	return angle2(vec1, vec2);
     }
 
     function angle3$1(vec1, vec2) {
-    	const signature = "angle3(vec1, vec2)";
-    	realArray(vec1, "vec1", signature);
-    	realArray(vec2, "vec2", signature);
-    	// warn/assert array sizes
+    	setContext$1("angle3(vec1, vec2)", arguments);
+    	realArray("vec1", 3);
+    	realArray("vec2", 3);
     	return angle3(vec1, vec2);
     }
 
     function angle4$1(vec1, vec2) {
-    	const signature = "angle4(vec1, vec2)";
-    	realArray(vec1, "vec1", signature);
-    	realArray(vec2, "vec2", signature);
-    	// warn/assert array sizes
+    	setContext$1("angle4(vec1, vec2)", arguments);
+    	realArray("vec1", 4);
+    	realArray("vec2", 4);
     	return angle4(vec1, vec2);
     }
 
     //Other component-wise operations
-    function fract$3(vec, target) {
-    	const signature = "fract(vec, ?target)";
-    	realArray(vec, "vec", signature);
-    	//assert target
-    	return fract$2(vec, target);
+    function fract$3(vec, target$1) {
+    	setContext$1("fract(vec, ?target)", arguments);
+    	realArray("vec");
+    	target("target", vec.length);
+    	return fract$2(vec, target$1);
     }
 
-    function fract2$1(vec, target) {
-    	const signature = "fract2(vec, ?target)";
-    	realArray(vec, "vec", signature);
-    	//assert target
-    	//warn array size
-    	return fract2(vec, target);
+    function fract2$1(vec, target$1) {
+    	setContext$1("fract2(vec, ?target)", arguments);
+    	realArray("vec", 2);
+    	target("target", 2);
+    	return fract2(vec, target$1);
     }
 
-    function fract3$1(vec, target) {
-    	const signature = "fract3(vec, ?target)";
-    	realArray(vec, "vec", signature);
-    	//assert target
-    	//warn array size
-    	return fract3(vec, target);
+    function fract3$1(vec, target$1) {
+    	setContext$1("fract3(vec, ?target)", arguments);
+    	realArray("vec", 3);
+    	target("target", 3);
+    	return fract3(vec, target$1);
     }
 
-    function fract4$1(vec, target) {
-    	const signature = "fract4(vec, ?target)";
-    	realArray(vec, "vec", signature);
-    	//assert target
-    	//warn array size
-    	return fract4(vec, target);
+    function fract4$1(vec, target$1) {
+    	setContext$1("fract4(vec, ?target)", arguments);
+    	realArray("vec", 4);
+    	target("target", 4);
+    	return fract4(vec, target$1);
     }
 
-    function polar2$1(vec, target) {
-    	const signature = "polar2(vec, ?target)";
-    	realArray(vec, "vec", signature);
-    	//assert target
-    	//warn array size
-    	return polar2(vec, target);
+    function polar2$1(vec, target$1) {
+    	setContext$1("polar2(vec, ?target)", arguments);
+    	realArray("vec", 2);
+    	target("target", 2);
+    	return polar2(vec, target$1);
     }
 
     // Freeze exports
@@ -1322,7 +1440,7 @@ var Mathicall = (function (exports) {
     }
 
     //Transpose
-    function transpose2(mat, target = new Float64Array(4)) {
+    function transpose2x2(mat, target = new Float64Array(4)) {
     	//Main diagonal
     	target[0] = mat[0];
     	target[3] = mat[3];
@@ -1335,7 +1453,7 @@ var Mathicall = (function (exports) {
     	return target;
     }
 
-    function transpose3(mat, target = new Float64Array(9)) {
+    function transpose3x3(mat, target = new Float64Array(9)) {
     	//Main diagonal
     	target[0] = mat[0];
     	target[4] = mat[4];
@@ -1355,7 +1473,7 @@ var Mathicall = (function (exports) {
     	return target;
     }
 
-    function transpose4(mat, target = new Float64Array(16)) {
+    function transpose4x4(mat, target = new Float64Array(16)) {
     	//Main diagonal
     	target[0] = mat[0];
     	target[5] = mat[5];
@@ -1419,12 +1537,12 @@ var Mathicall = (function (exports) {
     }
 
     //Determinant
-    function det2(mat) {
+    function det2x2(mat) {
     	return mat[0] * mat[3] - mat[1] * mat[2];
     }
 
     //Inverse
-    function inverse2(mat, target = new Float64Array(4)) {
+    function inverse2x2(mat, target = new Float64Array(4)) {
     	const a00 = mat[0];
     	const a01 = mat[1];
     	const a10 = mat[2];
@@ -1488,141 +1606,146 @@ var Mathicall = (function (exports) {
     Object.freeze(identity);
     Object.freeze(flatten);
     Object.freeze(smult$2);
-    Object.freeze(transpose2);
-    Object.freeze(transpose3);
-    Object.freeze(transpose4);
+    Object.freeze(transpose2x2);
+    Object.freeze(transpose3x3);
+    Object.freeze(transpose4x4);
     Object.freeze(mmult);
     Object.freeze(size);
-    Object.freeze(det2);
-    Object.freeze(inverse2);
+    Object.freeze(det2x2);
+    Object.freeze(inverse2x2);
     Object.freeze(vmult);
     Object.freeze(vmult2x2);
     Object.freeze(multv);
 
     function zeros$1(m, n) {
-        const signature = "zeros(m, n)";
-        positiveInteger(m, "m", signature);
-        positiveInteger(n, "n", signature);
+        setContext$1("zeros(m, n)", arguments);
+        positiveInteger("m");
+        positiveInteger("n");
+        clearContext();
         return zeros(m, n);
     }
 
     function constant$1(m, n, value) {
-    	const signature = "constant(m, n, value)";
-        positiveInteger(m, "m", signature);
-        positiveInteger(n, "n", signature);
-        realNumber(value, "value", signature);
+    	setContext$1("constant(m, n, value)", arguments);
+        positiveInteger("m");
+        positiveInteger("n");
+        realNumber("value");
+        clearContext();
         return constant(m, n, value);
     }
 
     function identity$1(m) {
-    	const signature = "identity(m)";
-        positiveInteger(m, "m", signature);
+    	setContext$1("identity(m)", arguments);
+        positiveInteger("m");
+        clearContext();
         return identity(m);
     }
 
-    function flatten$1(mat2d, target) { //Flattens 2D array into 1D array
+    /*
+    function flatten(mat2d, target) { //Flattens 2D array into 1D array
+    	setContext("flatten(mat2d, ?target)", arguments);
         //assert that mat2d is valid 2d unflattened matrix
         //assert target
-        return flatten(mat2d, target);
-    }
+        return src.flatten(mat2d, target);
+    }*/
 
     //Scaling
-    function smult$3(mat, k, target) {
-    	const signature = "smult(mat, k, target)";
-        flatMatrix(mat, "mat", signature);
-        realNumber(k, "k", signature);
-        //assert target
-        return smult$2(mat, k, target);
+    function smult$3(mat, k, target$1) {
+    	setContext$1("smult(mat, k, target)", arguments);
+        flatMatrix("mat");
+        realNumber("k");
+        target('target', mat.length);
+        clearContext();
+        return smult$2(mat, k, target$1);
     }
 
     //Transpose
-    function transpose2$1(mat, target) {
-        const signature = "transpose2(mat, target)";
-    	flatMatrix(mat, "mat", signature);
-    	//assert correct matrix size
-        //assert target
-        return transpose2(mat, target);
+    function transpose2x2$1(mat, target$1) {
+        setContext$1("transpose2x2(mat, target)", arguments);
+    	flatMatrix("mat", 2, 2);
+        target('target', mat.length);
+        clearContext();
+        return transpose2x2(mat, target$1);
     }
 
-    function transpose3$1(mat, target) {
-    	const signature = "transpose3(mat, target)";
-    	flatMatrix(mat, "mat", signature);
-        //assert correct matrix size
-        //assert target
-        return transpose3(mat, target);
+    function transpose3x3$1(mat, target$1) {
+    	setContext$1("transpose3x3(mat, target)", arguments);
+    	flatMatrix("mat", 3, 3);
+        target('target', mat.length);
+        clearContext();
+        return transpose3x3(mat, target$1);
     }
 
-    function transpose4$1(mat, target) {
-    	const signature = "transpose4(mat, target)";
-    	flatMatrix(mat, "mat", signature);
-        //assert correct matrix size
-        //assert target
-        return transpose4(mat, target);
+    function transpose4x4$1(mat, target$1) {
+    	setContext$1("transpose4x4(mat, target)", arguments);
+    	flatMatrix("mat", [4, 4] );
+        target('target', mat.length);
+        clearContext();
+        return transpose4x4(mat, target$1);
     }
 
     //Matrix multiplication
-    function mmult$1(mat1, mat2) { //consider adding target parameter
-    	const signature = "mmult(mat1, mat2)";
-    	flatMatrix(mat1, "mat1", signature);
-    	flatMatrix(mat2, "mat2", signature);
-    	//assert.mmultConformable(mat1, mat2, "mat1", "mat2", signature);
-        //assert correct matrix size
-        //assert target
+    function mmult$1(mat1, mat2) {
+    	setContext$1("mmult(mat1, mat2)", arguments);
+    	flatMatrix("mat1");
+    	flatMatrix("mat2", mat1.ncols);
+        clearContext();
         return mmult(mat1, mat2);
     }
 
     //Size
     function size$1(mat) {
-    	const signature = "size(mat)";
-    	flatMatrix(mat, "mat", signature);
+    	setContext$1("size(mat)", arguments);
+    	flatMatrix("mat");
+        clearContext();
     	return size(mat);
     }
 
     //Determinant
-    function det2$1(mat) {
-    	const signature = "det2(mat)";
-    	flatMatrix(mat, "mat", signature);
-    	//assert correct size
-    	return det2(mat);
+    function det2x2$1(mat) {
+    	setContext$1("det2x2(mat)", arguments);
+    	flatMatrix("mat", 2, 2);
+    	clearContext();
+    	return det2x2(mat);
     }
 
     //Inverse
-    function inverse2$1(mat, target) {
-    	const signature = "inverse2(mat, target)";
-    	flatMatrix(mat, "mat", signature);
-    	//assert correct size
-    	//assert target
-    	return inverse2(mat, target);
+    function inverse2x2$1(mat, target$1) {
+    	setContext$1("inverse2(mat, target)", arguments);
+    	flatMatrix("mat", 2, 2);
+    	target('target', 4);
+        clearContext();
+    	return inverse2x2(mat, target$1);
     }
 
     // Freeze exports
     Object.freeze(zeros$1);
     Object.freeze(constant$1);
     Object.freeze(identity$1);
-    Object.freeze(flatten$1);
+    //Object.freeze(flatten);
     Object.freeze(smult$3);
-    Object.freeze(transpose2$1);
-    Object.freeze(transpose3$1);
-    Object.freeze(transpose4$1);
+    Object.freeze(transpose2x2$1);
+    Object.freeze(transpose3x3$1);
+    Object.freeze(transpose4x4$1);
     Object.freeze(mmult$1);
     Object.freeze(size$1);
-    Object.freeze(det2$1);
-    Object.freeze(inverse2$1);
+    Object.freeze(det2x2$1);
+    Object.freeze(inverse2x2$1);
+    //export {flatten}
 
     var matrix_debug = /*#__PURE__*/Object.freeze({
         __proto__: null,
         zeros: zeros$1,
         constant: constant$1,
         identity: identity$1,
-        flatten: flatten$1,
         smult: smult$3,
-        transpose2: transpose2$1,
-        transpose3: transpose3$1,
-        transpose4: transpose4$1,
+        transpose2x2: transpose2x2$1,
+        transpose3x3: transpose3x3$1,
+        transpose4x4: transpose4x4$1,
         mmult: mmult$1,
         size: size$1,
-        det2: det2$1,
-        inverse2: inverse2$1
+        det2x2: det2x2$1,
+        inverse2x2: inverse2x2$1
     });
 
     var matrix_lib = /*#__PURE__*/Object.freeze({
@@ -1633,13 +1756,13 @@ var Mathicall = (function (exports) {
         identity: identity,
         flatten: flatten,
         smult: smult$2,
-        transpose2: transpose2,
-        transpose3: transpose3,
-        transpose4: transpose4,
+        transpose2x2: transpose2x2,
+        transpose3x3: transpose3x3,
+        transpose4x4: transpose4x4,
         mmult: mmult,
         size: size,
-        det2: det2,
-        inverse2: inverse2,
+        det2x2: det2x2,
+        inverse2x2: inverse2x2,
         vmult: vmult,
         vmult2x2: vmult2x2,
         multv: multv
@@ -1738,90 +1861,107 @@ var Mathicall = (function (exports) {
     Object.freeze(inverse);
     Object.freeze(polar);
 
-    function conj$1(z, target) {
-        const signature = "conj(z, ?target)";
-    	rectComplex(z, "z", signature);
-        //assert.target...
-        return conj(z, target);
+    function conj$1(z, target$1) {
+        setContext("conj(z, ?target)", arguments);
+    	rectComplex("z");
+        target('target', 2);
+        clearContext();
+        return conj(z, target$1);
     }
 
     function real$1(z) {
-    	const signature = "real(z)";
-    	rectComplex(z, "z", signature);
+    	setContext("real(z)", arguments);
+    	rectComplex("z");
+        clearContext();
         return real(z);
     }
 
     function imag$1(z) {
-    	const signature = "imag(z)";
-    	rectComplex(z, "z", signature);
+    	setContext("imag(z)", arguments);
+    	rectComplex("z");
+        clearContext();
         return imag(z);
     }
 
     function arg$1(z) {
-    	const signature = "arg(z)";
-    	rectComplex(z, "z", signature);
+    	setContext("arg(z)", arguments);
+    	rectComplex("z");
+        clearContext();
         return arg(z);
     }
 
     function abs$2(z) {
-    	const signature = "abs(z)";
-    	rectComplex(z, "z", signature);
+    	setContext("abs(z)", arguments);
+    	rectComplex("z");
+        clearContext();
         return abs$1(z);
     }
 
-    function add$3(z1, z2, target) {
-    	const signature = "add(z1, z2, ?target)";
-    	rectComplex(z1, "z1", signature);
-        rectComplex(z2, "z2", signature);
-        //assert target...
-        return add$2(z1, z2, target);
+    function add$3(z1, z2, target$1) {
+    	setContext("add(z1, z2, ?target)", arguments);
+    	rectComplex("z1");
+        rectComplex("z2");
+        target('target', 2);
+        clearContext();
+        return add$2(z1, z2, target$1);
     }
 
-    function sub$3(z1, z2, target) {
-    	const signature = "sub(z1, z2, ?target)";
-    	rectComplex(z1, "z1", signature);
-        rectComplex(z2, "z2", signature);
-        //assert target...
-        return sub$2(z1, z2, target);
+    function sub$3(z1, z2, target$1) {
+    	setContext("sub(z1, z2, ?target)", arguments);
+    	rectComplex("z1");
+        rectComplex("z2");
+        target('target', 2);
+        clearContext();
+        return sub$2(z1, z2, target$1);
     }
 
-    function cmult$1(z1, z2, target) {
-    	const signature = "cmult(z1, z2, ?target)";
-    	rectComplex(z1, "z1", signature);
-        rectComplex(z2, "z2", signature);
-        //assert target...
-        return cmult(z1, z2, target);
+    function cmult$1(z1, z2, target$1) {
+    	setContext("cmult(z1, z2, ?target)", arguments);
+    	rectComplex("z1");
+        rectComplex("z2");
+        target('target', 2);
+        clearContext();
+        return cmult(z1, z2, target$1);
     }
 
-    function smult$5(z, k, target) {
-    	const signature = "smult(z, k, ?target)";
-    	rectComplex(z, "z", signature);
-        realNumber(k, "k", signature);
-        return smult$4(z, k, target);
+    function smult$5(z, k, target$1) {
+    	setContext("smult(z, k, ?target)", arguments);
+    	rectComplex("z");
+        realNumber("k");
+        target('target', 2);
+        clearContext();
+        return smult$4(z, k, target$1);
     }
 
-    function div$1(z1, z2, target) {
-    	const signature = "div(z1, z2, ?target)";
-    	rectComplex(z1, "z1", signature);
-        rectComplex(z2, "z2", signature);
-        //assert target...
-        return div(z1, z2, target);
-        //warn.unDefined...
+    function div$1(z1, z2, target$1) {
+    	setContext("div(z1, z2, ?target)", arguments);
+    	rectComplex("z1");
+        rectComplex("z2");
+        target('target', 2);
+        const result = div(z1, z2, target$1);
+        notDefined(result);
+        clearContext();
+        return result;
     }
 
-    function inverse$1(z, target) {
-    	const signature = "inverse(z, ?target)";
-    	rectComplex(z, "z", signature);
-        //assert.target...
-        return inverse(z, target);
-        //warn.unDefined...
+    function inverse$1(z, target$1) {
+    	setContext("inverse(z, ?target)", arguments);
+    	rectComplex("z");
+        target('target', 2);
+        const result = inverse(z, target$1);
+        notDefined(result);
+        clearContext();
+        return result;
     }
 
-    function polar$1(z, target) {
-    	const signature = "inverse(z, ?target)";
-    	rectComplex(z, "z", signature);
-        //assert.target...
-        return inverse(z, target);
+    function polar$1(z, target$1) {
+    	setContext("inverse(z, ?target)", arguments);
+    	rectComplex("z");
+        target('target', 2);
+        const result = polar(z, target$1);
+        notDefined(result);
+        clearContext();
+        return result;
     }
 
     // Freeze exports
@@ -1996,82 +2136,93 @@ var Mathicall = (function (exports) {
     Object.freeze(inverse$2);
     Object.freeze(rect);
 
-    function conj$3(z, target) {
-        const signature = "conj(z, ?target)";
-        //assert.complexTarget
-        polarComplex(z, "z", signature);
-        return conj$2(z, target);
+    function conj$3(z, target$1) {
+        setContext$1("conj(z, ?target)", arguments);
+        target('target', 2);
+        polarComplex("z");
+        clearContext();
+        return conj$2(z, target$1);
     }
 
     function real$3(z) {
-        const signature = "real(z)";
-        polarComplex(z, "z", signature);
+        setContext$1("real(z)", arguments);
+        polarComplex("z");
+        clearContext();
     	return real$2(z);
     }
 
     function imag$3(z) {
-        const signature = "imag(z)";
-        polarComplex(z, "z", signature);
+        setContext$1("imag(z)", arguments);
+        polarComplex("z");
+        clearContext();
     	return imag$2(z);
     }
 
     function arg$3(z) {
-        const signature = "arg(z)";
-        polarComplex(z, "z", signature);
+        setContext$1("arg(z)", arguments);
+        polarComplex("z");
+        clearContext();
     	return arg$2(z);
     }
 
     function abs$4(z) {
-        const signature = "abs(z)";
-        polarComplex(z, "z", signature);
+        setContext$1("abs(z)", arguments);
+        polarComplex("z");
+        clearContext();
     	return abs$3(z);
     }
 
-    function smult$7(z, k, target) {
-        const signature = "smult(z, k, ?target)";
-    	polarComplex(z, "z", signature);
-        realNumber(k, "k", signature);
-        //assert.target...
-        return smult$6(z, k, target);
+    function smult$7(z, k, target$1) {
+        setContext$1("smult(z, k, ?target)", arguments);
+    	polarComplex("z");
+        realNumber("k");
+        target('target', 2);
+        clearContext();
+        return smult$6(z, k, target$1);
     }
 
-    function cmult$3(z1, z2, target) {
-    	const signature = "cmult(z1, z2, ?target)";
-    	polarComplex(z1, "z1", signature);
-        polarComplex(z2, "z2", signature);
-        //assert.target...
-        return cmult$2(z1, z2, target);
+    function cmult$3(z1, z2, target$1) {
+    	setContext$1("cmult(z1, z2, ?target)", arguments);
+    	polarComplex("z1");
+        polarComplex("z2");
+        target('target', 2);
+        return cmult$2(z1, z2, target$1);
     }
 
-    function div$3(z1, z2, target) {
-    	const signature = "div(z1, z2, ?target)";
-    	polarComplex(z1, "z1", signature);
-        polarComplex(z2, "z2", signature);
-        //assert.target...
-        return div$2(z1, z2, target);
-        //warn.notDefined
+    function div$3(z1, z2, target$1) {
+    	setContext$1("div(z1, z2, ?target)", arguments);
+    	polarComplex("z1");
+        polarComplex("z2");
+        target('target', 2);
+        const result = div$2(z1, z2, target$1);
+        notDefined(result);
+        clearContext();
+        return result;
     }
 
-    function pow$2(z, n, target) {
-    	const signature = "pow(z, n, ?target)";
-        polarComplex(z, "z", signature);
-        realNumber(n, "n", signature);
-        //assert.target...
-        return pow$1(z, n, target);
+    function pow$2(z, n, target$1) {
+    	setContext$1("pow(z, n, ?target)", arguments);
+        polarComplex("z");
+        realNumber("n");
+        target('target', 2);
+        clearContext();
+        return pow$1(z, n, target$1);
     }
 
-    function inverse$3(z, target) {
-    	const signature = "inverse(z, ?target)";
-        polarComplex(z, "z", signature);
-        //assert.target...
-        return inverse$2(z, target);
+    function inverse$3(z, target$1) {
+    	setContext$1("inverse(z, ?target)", arguments);
+        polarComplex("z");
+        target('target', 2);
+        clearContext();
+        return inverse$2(z, target$1);
     }
 
-    function rect$1(z, target) {
-    	const signature = "rect(z, ?target)";
-        polarComplex(z, "z", signature);
-        //assert.target...
-        return rect(z, target);
+    function rect$1(z, target$1) {
+    	setContext$1("rect(z, ?target)", arguments);
+        polarComplex("z");
+        target('target', 2);
+        clearContext();
+        return rect(z, target$1);
     }
 
     // Freeze exports
@@ -2205,7 +2356,7 @@ var Mathicall = (function (exports) {
 
     function prod(arr) {
     	const len = arr.length;
-    	let result = arr[0]; //Defaults to undefined if array is empty
+    	let result = 1; //By convention for empty array
     	for (let i = 1; i < len; i++) {
     		result *= arr[i];
     	}
@@ -2279,7 +2430,7 @@ var Mathicall = (function (exports) {
     		}
     		//Linear search for first occurrence once region becomes small enough
     		while (lowerBound <= upperBound) { 
-    			if (array[lowerBound] === value) {return lowerBound;}
+    			if (arr[lowerBound] === value) {return lowerBound;}
     			lowerBound++;
     		}
     	}
@@ -2343,7 +2494,7 @@ var Mathicall = (function (exports) {
     	}
     }
 
-    function equal(arr1, arr2) {
+    function isEqual(arr1, arr2) {
     	const len1 = arr1.length;
     	const len2 = arr2.length;
     	if (len1 !== len2) {return false;}
@@ -2469,54 +2620,102 @@ var Mathicall = (function (exports) {
     Object.freeze(unique);
     Object.freeze(indexOf);
     Object.freeze(union);
-    Object.freeze(equal);
+    Object.freeze(isEqual);
     Object.freeze(sortUint8);
     Object.freeze(imin);
     Object.freeze(imax);
     Object.freeze(count);
 
     function sum$1(arr) {
-    	const signature = "sum(arr)";
-    	realArray(arr, "arr", signature);
+    	setContext$1("sum(arr)", arguments);
+    	realArray("arr");
     	const result = sum(arr);
-    	realOverflow(result, signature);
+    	realOverflow(result);
+    	clearContext();
     	return result;
     }
 
-    function min$2(arr, sorted) {
-    	const signature = "min(arr, ?sorted)";
-    	realArray(arr, "arr", signature);
-    	bool(sorted, "sorted", signature);
-    	//assert.sortedMatch(arr, sorted);
-    	return min$1(arr, sorted);
+    function min$2(arr, sorted$1) {
+    	setContext$1("min(arr, ?sorted)", arguments);
+    	realArray("arr");
+    	bool$1("sorted");
+    	sorted("arr", "sorted");
+    	clearContext();
+    	return min$1(arr, sorted$1);
     }
 
-    function max$2(arr, sorted) {
-    	const signature = "max(arr, ?sorted)";
-    	realArray(arr, "arr", signature);
-    	bool(sorted, "sorted", signature);
-    	return max$1(arr, sorted);
+    function max$2(arr, sorted$1) {
+    	setContext$1("max(arr, ?sorted)", arguments);
+    	realArray("arr");
+    	bool$1("sorted");
+    	sorted("arr", "sorted");
+    	clearContext();
+    	return max$1(arr, sorted$1);
     }
 
     function prod$1(arr) {
-    	const signature = "prod(arr)";
-    	realArray(arr, "arr", signature);
+    	setContext$1("prod(arr)", arguments);
+    	realArray('arr');
+    	clearContext();
     	return prod(arr);
     }
 
-    function unique$1(arr, sorted) {
-    	const signature = "unique(arr, ?sorted)";
-    	realArray(arr, "arr", signature);
-    	bool(sorted, "sorted", signature);
-    	return unique(arr, sorted);
+    function unique$1(arr, sorted$1) {
+    	setContext$1("unique(arr, ?sorted)", arguments);
+    	realArray('arr');
+    	bool$1('sorted');
+    	sorted('arr', 'sorted');
+    	clearContext();
+    	return unique(arr, sorted$1);
     }
 
-    function indexOf$1(arr, value, sorted) {
-    	const signature = "indexOf(arr, value, ?sorted)";
-    	bool(sorted, "sorted", signature);
-    	realArray(arr, "arr", signature);
-    	ifSorted(arr, sorted, "arr", signature);
-    	return indexOf(arr, value, sorted);
+    function indexOf$1(arr, value, sorted$1) {
+    	setContext$1("indexOf(arr, value, ?sorted)", arguments);
+    	realArray('arr');
+    	realNumber('value');
+    	bool$1('sorted');
+    	sorted('arr', 'sorted');
+    	clearContext();
+    	return indexOf(arr, value, sorted$1);
+    }
+
+    function union$1(arr1, arr2, sorted$1) {
+    	setContext$1("union(arr1, arr2, ?sorted)", arguments);
+    	realArray('arr1');
+    	realArray('arr2');
+    	bool$1('sorted');
+    	sorted('arr1', 'sorted');
+    	sorted('arr2', 'sorted'); // May have ensure sorted same way as arr1
+    	clearContext();
+    	return union(arr1, arr2, sorted$1);
+    }
+
+    function isEqual$1(arr1, arr2) {
+    	setContext$1("isEqual(arr1, arr2)", arguments);
+    	realArray('arr1');
+    	realArray('arr2');
+    	clearContext();
+    	return isEqual(arr1, arr2);
+    }
+
+    function sortUint8$1(arr, target$1) {
+    	setContext$1('sortUint8(arr, ?target)', arguments);
+    	if (arr.constructor !== Uint8Array) {
+    		throw 'sortUint8(arr, ?target): arr must be a Uint8Array';
+    	}
+    	target('target', arr.length);
+    	clearContext();
+    	return sortUint8(arr, target$1);
+    }
+
+    function count$1(arr, value, sorted$1) {
+    	setContext$1("count(arr, value, ?sorted)", arguments);
+    	realArray('arr');
+    	realNumber('value');
+    	bool$1('sorted');
+    	sorted('arr', 'sorted');
+    	clearContext();
+    	return count(arr, value, sorted$1);
     }
 
     // Freeze exports
@@ -2526,6 +2725,10 @@ var Mathicall = (function (exports) {
     Object.freeze(prod$1);
     Object.freeze(unique$1);
     Object.freeze(indexOf$1);
+    Object.freeze(union$1);
+    Object.freeze(isEqual$1);
+    Object.freeze(sortUint8$1);
+    Object.freeze(count$1);
 
     var array_debug = /*#__PURE__*/Object.freeze({
         __proto__: null,
@@ -2547,7 +2750,7 @@ var Mathicall = (function (exports) {
         unique: unique,
         indexOf: indexOf,
         union: union,
-        equal: equal,
+        isEqual: isEqual,
         sortUint8: sortUint8,
         imin: imin,
         imax: imax,
@@ -2806,7 +3009,7 @@ var Mathicall = (function (exports) {
     	if (count === undefined) { //Return single value
     		return a + (b - a) * random();
     	} else { //Return array of values
-    		result = new Float64Array(count);
+    		const result = new Float64Array(count);
     		for (let i = 0; i < count; i++) {
     			result[i] = a + (b - a) * random();
     		}
@@ -2831,7 +3034,7 @@ var Mathicall = (function (exports) {
     }
 
     // Normal distribution
-    function norm(mean, sd, count = undefined) { //Ratio-of-uniforms algorithm
+    function norm(mean = 0, sd = 1, count = undefined) { //Ratio-of-uniforms algorithm
     	if (count === undefined) { //Return single value
     		while (true) {
     			const u1 = random();
@@ -2859,11 +3062,11 @@ var Mathicall = (function (exports) {
     }
 
     // Exponential distribution
-    function exp$1(lambda, count = undefined) {
+    function exp$1(lambda = 1, count = undefined) {
     	if (count === undefined) { //Return single value
     		return -ln(random()) / lambda;
     	} else { //Return array of values
-    		result = new Float64Array(count);
+    		const result = new Float64Array(count);
     		for (let i = 0; i < count; i++) {
     			result[i] = -ln(random()) / lambda;
     		}
@@ -2874,26 +3077,25 @@ var Mathicall = (function (exports) {
     //Seeded random number generators
 
     // (Uniform) Multiplicative congruential generator
-    function MCG(seed, range = [0, 1]) {
-    	let s, a, b, scaleFactor, state; //Declare variables
-    	const _seed = function(seed = undefined) {
-    		if (seed !== undefined) { //Set new seed and reset state
-    			s = floor(abs(seed));
-    			state = s;
+    function MCG(a = 0, b = 1, seed = int(1, 4294967295)) {
+    	let scaleFactor, state; //Declare variables
+    	const _seed = function(s = undefined) {
+    		if (s !== undefined) { //Set new seed and reset state
+    			seed = floor(abs(s)); //TODO: use hash instead of just floor(abs())
+    			state = seed;
     		}
-    		return s; //Return current seed (whether updated or not)
+    		return seed; //Return current seed (whether updated or not)
     	};
-    	const _range = function(range = undefined) {
-    		if (range !== undefined) { //Set new range
-    			a = range[0];
-    			b = range[1];
-    			scaleFactor = (b - a) / MCG_M_PLUS_1;
-    		}
+    	const _range = function(r = a, s = b) {
+    		//Set new range
+    		a = r;
+    		b = s;
+    		scaleFactor = (b - a) / MCG_M_PLUS_1;
     		return [a, b];
     	};
     	//Initialise variables
     	_seed(seed);
-    	_range(range);
+    	_range(a, b);
 
     	const generator = function(count = undefined) {
     		if (count === undefined) { //Return single value
@@ -2915,27 +3117,26 @@ var Mathicall = (function (exports) {
     }
 
     //Xorshift
-    function Xorshift32(seed, range = [0, 1]) {
+    function Xorshift32(a = 0, b = 1, seed = int(1, 4294967295)) {
     	const state = new Uint32Array(1);
-    	let a, b, scaleFactor;
+    	let scaleFactor;
     	const _seed = function(s = undefined) {
     		if (s !== undefined) { //Set new seed and reset state
-    			seed = trunc(s) || 1;
+    			seed = trunc(s) || 1; //TODO: use hash, not just trunc(s)
     			state[0] = seed;
     		}
     		return seed; //Return current seed (whether updated or not)
     	};
-    	const _range = function(r = undefined) {
-    		if (r !== undefined) { //Set new range
-    			a = r[0];
-    			b = r[1];
-    			scaleFactor = (b - a) / 4294967296;
-    		}
+    	const _range = function(r = a, s = b) {
+    		//Set new range
+    		a = r;
+    		b = s;
+    		scaleFactor = (b - a) / 4294967296;
     		return [a, b];
     	};
 
     	_seed(seed);
-    	_range(range);
+    	_range(a, b);
 
     	const generator = function(count = undefined) {
     		if (count === undefined) { //Return single value
@@ -2960,9 +3161,8 @@ var Mathicall = (function (exports) {
     	return Object.freeze(generator);
     }
 
-    function RU(seed, mean = 0, sd = 1) { //Ratio of uniforms
-    	const urand = Xorshift32(seed+1);
-    	//TODO: hash seed instead of just adding 1
+    function RU(mean = 0, sd = 1, seed = int(1, 4294967295)) { //Ratio of uniforms
+    	const urand = Xorshift32(0, 1, seed); //TODO: hash seed
     	
     	const generator = function(count = undefined) {
     		if (count === undefined) { //Return single value
@@ -2979,8 +3179,8 @@ var Mathicall = (function (exports) {
     			const result = new Float64Array(count);
     			let i = 0;
     			while (i < count) {
-    				const u1 = random();
-    				const v2 = random();
+    				const u1 = urand();
+    				const v2 = urand();
     				const u2 = (2 * v2 - 1) * RU_SCALE_CONSTANT;
     				const x = u2 / u1;
     				if ( (u1 * u1) <= exp(-0.5 * x * x)) {
@@ -2991,9 +3191,19 @@ var Mathicall = (function (exports) {
     		}
     	};
 
-    	generator.seed = urand.seed;
-    	generator.mean = Object.freeze(mean);
-    	generator.sd = Object.freeze(sd);
+    	const _mean = function(u = mean) {
+    		mean = u;
+    		return mean;
+    	};
+
+    	const _sd = function(s = sd) {
+    		sd = s;
+    		return sd;
+    	};
+
+    	generator.seed = urand.seed; //TODO: hash seed
+    	generator.mean = Object.freeze(_mean);
+    	generator.sd = Object.freeze(_sd);
 
     	return Object.freeze(generator);
     }
@@ -3001,8 +3211,8 @@ var Mathicall = (function (exports) {
     const Unif = Xorshift32;
     const Norm = RU;
 
-    const Int = function(seed, range = [0, 1]) {
-    	const urand = Xorshift32(seed, [ceil(range[0]), floor(range[1]) + 1]);
+    const Int = function(a, b, seed = int(1, 4294967295)) {
+    	const urand = Xorshift32(ceil(a), floor(b) + 1, seed); //TODO: hash seed
 
     	const generator = function(count = undefined) {
     		if (count === undefined) { //Return single value
@@ -3016,28 +3226,28 @@ var Mathicall = (function (exports) {
     		}
     	};
 
-    	const _range = function(r = undefined) {
-    		if (r !== undefined) {
-    			urand.range([ceil(r[0]), floor(r[1]) + 1]);
-    		}
-    		return urand.range();
+    	const _range = function(r = a, s = b) {
+    		a = r;
+    		b = s;
+    		urand.range(ceil(a), floor(b) + 1);
+    		return [a, b];
     	};
 
-    	generator.seed = urand.seed;
+    	generator.seed = urand.seed; //TODO: hash seed
     	generator.range = Object.freeze(_range);
 
     	return Object.freeze(generator);
     };
 
     // Exponential
-    function Exp(seed, lambda = 1) {
-    	const urand = Xorshift32(seed);
+    function Exp(lambda = 1, seed = int(1, 4294967295)) {
+    	const urand = Xorshift32(0, 1, seed); //TODO: hash seed
 
     	const generator = function(count = undefined) {
     		if (count === undefined) { //Return single value
     			return -ln(urand()) / lambda;
     		} else { //Return array of values
-    			result = new Float64Array(count);
+    			const result = new Float64Array(count);
     			for (let i = 0; i < count; i++) {
     				result[i] = -ln(urand()) / lambda;
     			}

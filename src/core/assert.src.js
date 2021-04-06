@@ -1,127 +1,132 @@
+import { signature, args, warn } from "./core.src.js";
+
 const TYPED_ARRAY_CONSTRUCTORS = [
     Int8Array, Uint8Array, Uint8ClampedArray,
     Int16Array, Uint16Array, Int32Array, Uint32Array,
     Float32Array, Float64Array];
 
-function realNumber(value, label, signature) {
+function realNumber(parameter) {
+    const value = args[parameter];
     if (value.constructor !== Number) { //Assert type Number
-        throw `${signature}: ${label} must be of type Number.`;
+        throw `${signature}: ${parameter} must be of type Number.`;
     }
 	if (!isFinite(value)) { //Exclude Infinity and NaN
-        throw `${signature}: ${label} cannot be NaN or Infinity.`;
+        throw `${signature}: ${parameter} cannot be NaN or Infinity.`;
     }
 }
 
-function realArray(value, label, signature) {
-    if (TYPED_ARRAY_CONSTRUCTORS.includes(value.constructor)) {return;}
-    if (Array.isArray(value)) {
+function realArray(parameter, length) {
+    const value = args[parameter];
+    if (TYPED_ARRAY_CONSTRUCTORS.includes(value.constructor) || Array.isArray(value)) {
         const len = value.length;
+        if (len !== length) {
+            throw `${signature}: ${parameter} has incorrect length`;
+        }
         if (len === 0) {
-            console.warn(`${signature}: ${label} is empty.`);
+            warn(`${signature}: ${parameter} is empty.`);
         }
         for (let i = 0; i < len; i++) {
 			const x = value[i];
             if (value.constructor !== Number) { //Assert type Number
-                throw `${signature}: ${label} must an array of Numbers.`;
+                throw `${signature}: ${parameter} must an array of Numbers.`;
             }
             if (!isFinite(value)) { //Exclude Infinity and NaN
-                throw `${signature}: ${label} contains NaN or Infinity.`;
+                throw `${signature}: ${parameter} contains NaN or Infinity.`;
             }
         }
     }
-    throw `${signature}: ${label} must be an Array or TypedArray.`;
+    throw `${signature}: ${parameter} must be an Array or TypedArray.`;
 }
 
-function integer(value, label, signature) {
+function integer(parameter) {
+    const value = args[parameter];
     if (!Number.isInteger(value)) {
-        throw `${signature}: ${label} must be an integer of type Number.`;
+        throw `${signature}: ${parameter} must be an integer of type Number.`;
     }
 }
 
-function positive(value, label, signature) {
-    realNumber(value, label, signature);
+function positive(parameter) {
+    const value = args[parameter];
+    realNumber(parameter);
     if (value <= 0) {
-        throw `${signature}: ${label} must be positive.`;
+        throw `${signature}: ${parameter} must be positive.`;
     }
 }
 
-function nonNegative(value, label, signature) {
-    realNumber(value, label, signature);
+function nonNegative(parameter) {
+    const value = args[parameter];
+    realNumber(parameter);
     if (value < 0) {
-        throw `${signature}: ${label} must be non-negative.`;
+        throw `${signature}: ${parameter} must be non-negative.`;
     }
 }
 
-function rectVector(value, label, signature) {
-    realArray(value, label, signature);
+function rectVector(parameter) {
+    realArray(parameter);
 }
 
-function polarVector(value, label, signature) {
-    realArray(value, label, signature);
+function polarVector(parameter) {
+    const value = args[parameter];
+    realArray(parameter);
     if (value[0] < 0) {
-        console.warn(`${signature}: ${label} expressed with negative magnitude.`);
+        console.warn(`${signature}: ${parameter} expressed with negative magnitude.`);
     }
 }
 
-function bool(value, label, signature) {
+function bool(parameter) {
+    const value = args[parameter];
     if ( (value !== true) && (value !== false) ) {
-        throw `${signature}: ${label} must be a boolean value.`;
+        throw `${signature}: ${parameter} must be a boolean value.`;
     }
 }
 
-function ifSorted(arr, sorted, label, signature) {
-    if (sorted) {
-        const len = arr.length;
-        if (arr[len-1] > arr[0]) { //Ascending
-            for (let i = 1; i < len; i++) {
-                if (arr[i] < arr[i-1]) {
-                    throw `${signature}: sorted set to true but ${label} is unsorted`;
-                }
-            }
-        } else { //Descending
-            for (let i = 1; i < len; i++) {
-                if (arr[i] > arr[i-1]) {
-                    throw `${signature}: sorted set to true but ${label} is unsorted`;
-                }
-            }
-        }
-    }
-}
-
-function polarComplex(value, label, signature) {
-    realArray(value, label, signature);
+function polarComplex(parameter) {
+    const value = args[parameter];
+    realArray(parameter);
     const len = value.length;
     if (len < 2) {
-        throw `${signature}: ${label} must have two components.`;
+        throw `${signature}: ${parameter} must have two components.`;
     }
     if (len > 2) {
-        console.warn(`${signature}: ${label} contains additional values which will be ignored.`);
+        console.warn(`${signature}: ${parameter} contains additional values which will be ignored.`);
     }
     if (value[0] < 0) {
-        console.warn(`${signature}: ${label} expressed with negative magnitude.`);
+        console.warn(`${signature}: ${parameter} expressed with negative magnitude.`);
     }
 }
 
-function rectComplex(value, label, signature) {
-    realArray(value, label, signature);
+function rectComplex(parameter) {
+    const value = args[parameter];
+    realArray(parameter);
     const len = value.length;
     if (len < 2) {
-        throw `${signature}: ${label} must have two components.`;
+        throw `${signature}: ${parameter} must have two components.`;
     }
     if (len > 2) {
-        console.warn(`${signature}: ${label} contains additional values which will be ignored.`);
+        console.warn(`${signature}: ${parameter} contains additional values which will be ignored.`);
     }
 }
 
-function positiveInteger(value, label, signature) {
-    integer(value, label, signature);
-    positive(value, label, signature);
+function positiveInteger(parameter) {
+    integer(parameter);
+    positive(parameter);
 }
 
-function flatMatrix(value, label, signature) {
-    realArray(value, label, signature);
-    positiveInteger(value.rows, `${label}.rows`, signature);
-    positiveInteger(value.cols, `${label}.cols`, signature);
+function flatMatrix(parameter, nrows, ncols) {
+    realArray(parameter);
+    const value = args[parameter];
+    if ( (!Number.isInteger(value.nrows)) || (value.nrows < 1) ) {
+        throw `${signature}: ${parameter}.nrows is invalid`;
+    }
+    if ((!Number.isInteger(value.ncols)) || (value.ncols < 1)) {
+        throw `${signature}: ${parameter}.ncols is invalid`;
+    }
+    if (value.nrows * value.ncols !== value.length) {
+        throw `${signature}: ${parameter}.length does not match ${parameter}.nrows * ${parameter}.ncols`;
+    }
+    if ( (value.nrows !== nrows) || (value.ncols !== ncols) ) {
+        throw `${signature}: ${parameter} has incorrect dimensions`;
+    }
 }
 
 //Freeze exports
@@ -133,12 +138,11 @@ Object.freeze(nonNegative);
 Object.freeze(rectVector);
 Object.freeze(polarVector);
 Object.freeze(bool);
-Object.freeze(ifSorted);
 Object.freeze(polarComplex);
 Object.freeze(rectComplex);
 Object.freeze(flatMatrix);
 Object.freeze(positiveInteger);
 
 // Export
-export {realNumber, realArray, integer, positive, rectVector, polarVector, bool, ifSorted}
+export {realNumber, realArray, integer, positive, rectVector, polarVector, bool}
 export {polarComplex, rectComplex, nonNegative, flatMatrix, positiveInteger}

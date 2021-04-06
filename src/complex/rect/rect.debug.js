@@ -1,90 +1,107 @@
 import * as src from "./rect.src.js";
-import {assert} from "../../core/core.lib.js";
+import {assert, clearContext, optional, warnif} from "../../core/core.lib.js";
 
 function conj(z, target) {
-    const signature = "conj(z, ?target)";
-	assert.rectComplex(z, "z", signature);
-    //assert.target...
+    setContext("conj(z, ?target)", arguments);
+	assert.rectComplex("z");
+    optional.target('target', 2);
+    clearContext();
     return src.conj(z, target);
 }
 
 function real(z) {
-	const signature = "real(z)";
-	assert.rectComplex(z, "z", signature);
+	setContext("real(z)", arguments);
+	assert.rectComplex("z");
+    clearContext();
     return src.real(z);
 }
 
 function imag(z) {
-	const signature = "imag(z)";
-	assert.rectComplex(z, "z", signature);
+	setContext("imag(z)", arguments);
+	assert.rectComplex("z");
+    clearContext();
     return src.imag(z);
 }
 
 function arg(z) {
-	const signature = "arg(z)";
-	assert.rectComplex(z, "z", signature);
+	setContext("arg(z)", arguments);
+	assert.rectComplex("z");
+    clearContext();
     return src.arg(z);
 }
 
 function abs(z) {
-	const signature = "abs(z)";
-	assert.rectComplex(z, "z", signature);
+	setContext("abs(z)", arguments);
+	assert.rectComplex("z");
+    clearContext();
     return src.abs(z);
 }
 
 function add(z1, z2, target) {
-	const signature = "add(z1, z2, ?target)";
-	assert.rectComplex(z1, "z1", signature);
-    assert.rectComplex(z2, "z2", signature);
-    //assert target...
+	setContext("add(z1, z2, ?target)", arguments);
+	assert.rectComplex("z1");
+    assert.rectComplex("z2");
+    optional.target('target', 2);
+    clearContext();
     return src.add(z1, z2, target);
 }
 
 function sub(z1, z2, target) {
-	const signature = "sub(z1, z2, ?target)";
-	assert.rectComplex(z1, "z1", signature);
-    assert.rectComplex(z2, "z2", signature);
-    //assert target...
+	setContext("sub(z1, z2, ?target)", arguments);
+	assert.rectComplex("z1");
+    assert.rectComplex("z2");
+    optional.target('target', 2);
+    clearContext();
     return src.sub(z1, z2, target);
 }
 
 function cmult(z1, z2, target) {
-	const signature = "cmult(z1, z2, ?target)";
-	assert.rectComplex(z1, "z1", signature);
-    assert.rectComplex(z2, "z2", signature);
-    //assert target...
+	setContext("cmult(z1, z2, ?target)", arguments);
+	assert.rectComplex("z1");
+    assert.rectComplex("z2");
+    optional.target('target', 2);
+    clearContext();
     return src.cmult(z1, z2, target);
 }
 
 function smult(z, k, target) {
-	const signature = "smult(z, k, ?target)";
-	assert.rectComplex(z, "z", signature);
-    assert.realNumber(k, "k", signature);
+	setContext("smult(z, k, ?target)", arguments);
+	assert.rectComplex("z");
+    assert.realNumber("k");
+    optional.target('target', 2);
+    clearContext();
     return src.smult(z, k, target);
 }
 
 function div(z1, z2, target) {
-	const signature = "div(z1, z2, ?target)";
-	assert.rectComplex(z1, "z1", signature);
-    assert.rectComplex(z2, "z2", signature);
-    //assert target...
-    return src.div(z1, z2, target);
-    //warn.unDefined...
+	setContext("div(z1, z2, ?target)", arguments);
+	assert.rectComplex("z1");
+    assert.rectComplex("z2");
+    optional.target('target', 2);
+    const result = src.div(z1, z2, target);
+    warnif.notDefined(result);
+    clearContext();
+    return result;
 }
 
 function inverse(z, target) {
-	const signature = "inverse(z, ?target)";
-	assert.rectComplex(z, "z", signature);
-    //assert.target...
-    return src.inverse(z, target);
-    //warn.unDefined...
+	setContext("inverse(z, ?target)", arguments);
+	assert.rectComplex("z");
+    optional.target('target', 2);
+    const result = src.inverse(z, target);
+    warnif.notDefined(result);
+    clearContext();
+    return result;
 }
 
 function polar(z, target) {
-	const signature = "inverse(z, ?target)";
-	assert.rectComplex(z, "z", signature);
-    //assert.target...
-    return src.inverse(z, target);
+	setContext("inverse(z, ?target)", arguments);
+	assert.rectComplex("z");
+    optional.target('target', 2);
+    const result = src.polar(z, target);
+    warnif.notDefined(result);
+    clearContext();
+    return result;
 }
 
 // Freeze exports

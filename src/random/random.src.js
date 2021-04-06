@@ -1,4 +1,5 @@
-import {E, ln, exp as stdExp, random, floor, abs, sqrt, trunc} from "../standard/standard.lib.js";
+import {E, ln, exp as stdExp, random, floor, ceil, abs, sqrt, trunc} from "../standard/standard.lib.js";
+import { sdev } from "../statistics/statistics.src.js";
 
 //Constants
 // Ratio-of-uniforms
@@ -14,7 +15,7 @@ function unif(a = 0, b = 1, count = undefined) { //a>b or b>a
 	if (count === undefined) { //Return single value
 		return a + (b - a) * random();
 	} else { //Return array of values
-		result = new Float64Array(count);
+		const result = new Float64Array(count);
 		for (let i = 0; i < count; i++) {
 			result[i] = a + (b - a) * random();
 		}
@@ -39,7 +40,7 @@ function int(a, b, count = undefined) { //assumes b > a
 }
 
 // Normal distribution
-function norm(mean, sd, count = undefined) { //Ratio-of-uniforms algorithm
+function norm(mean = 0, sd = 1, count = undefined) { //Ratio-of-uniforms algorithm
 	if (count === undefined) { //Return single value
 		while (true) {
 			const u1 = random();
@@ -67,11 +68,11 @@ function norm(mean, sd, count = undefined) { //Ratio-of-uniforms algorithm
 }
 
 // Exponential distribution
-function exp(lambda, count = undefined) {
+function exp(lambda = 1, count = undefined) {
 	if (count === undefined) { //Return single value
 		return -ln(random()) / lambda;
 	} else { //Return array of values
-		result = new Float64Array(count);
+		const result = new Float64Array(count);
 		for (let i = 0; i < count; i++) {
 			result[i] = -ln(random()) / lambda;
 		}
@@ -82,26 +83,25 @@ function exp(lambda, count = undefined) {
 //Seeded random number generators
 
 // (Uniform) Multiplicative congruential generator
-function MCG(seed, range = [0, 1]) {
-	let s, a, b, scaleFactor, state; //Declare variables
-	const _seed = function(seed = undefined) {
-		if (seed !== undefined) { //Set new seed and reset state
-			s = floor(abs(seed));
-			state = s;
+function MCG(a = 0, b = 1, seed = int(1, 4294967295)) {
+	let scaleFactor, state; //Declare variables
+	const _seed = function(s = undefined) {
+		if (s !== undefined) { //Set new seed and reset state
+			seed = floor(abs(s)); //TODO: use hash instead of just floor(abs())
+			state = seed;
 		}
-		return s; //Return current seed (whether updated or not)
+		return seed; //Return current seed (whether updated or not)
 	}
-	const _range = function(range = undefined) {
-		if (range !== undefined) { //Set new range
-			a = range[0];
-			b = range[1];
-			scaleFactor = (b - a) / MCG_M_PLUS_1;
-		}
+	const _range = function(r = a, s = b) {
+		//Set new range
+		a = r;
+		b = s;
+		scaleFactor = (b - a) / MCG_M_PLUS_1;
 		return [a, b];
 	}
 	//Initialise variables
 	_seed(seed);
-	_range(range);
+	_range(a, b);
 
 	const generator = function(count = undefined) {
 		if (count === undefined) { //Return single value
@@ -123,27 +123,26 @@ function MCG(seed, range = [0, 1]) {
 }
 
 //Xorshift
-function Xorshift32(seed, range = [0, 1]) {
+function Xorshift32(a = 0, b = 1, seed = int(1, 4294967295)) {
 	const state = new Uint32Array(1);
-	let a, b, scaleFactor;
+	let scaleFactor;
 	const _seed = function(s = undefined) {
 		if (s !== undefined) { //Set new seed and reset state
-			seed = trunc(s) || 1;
+			seed = trunc(s) || 1; //TODO: use hash, not just trunc(s)
 			state[0] = seed;
 		}
 		return seed; //Return current seed (whether updated or not)
 	}
-	const _range = function(r = undefined) {
-		if (r !== undefined) { //Set new range
-			a = r[0];
-			b = r[1];
-			scaleFactor = (b - a) / 4294967296;
-		}
+	const _range = function(r = a, s = b) {
+		//Set new range
+		a = r;
+		b = s;
+		scaleFactor = (b - a) / 4294967296;
 		return [a, b];
 	}
 
 	_seed(seed);
-	_range(range);
+	_range(a, b);
 
 	const generator = function(count = undefined) {
 		if (count === undefined) { //Return single value
@@ -168,9 +167,8 @@ function Xorshift32(seed, range = [0, 1]) {
 	return Object.freeze(generator);
 }
 
-function RU(seed, mean = 0, sd = 1) { //Ratio of uniforms
-	const urand = Xorshift32(seed+1);
-	//TODO: hash seed instead of just adding 1
+function RU(mean = 0, sd = 1, seed = int(1, 4294967295)) { //Ratio of uniforms
+	const urand = Xorshift32(0, 1, seed); //TODO: hash seed
 	
 	const generator = function(count = undefined) {
 		if (count === undefined) { //Return single value
@@ -187,8 +185,8 @@ function RU(seed, mean = 0, sd = 1) { //Ratio of uniforms
 			const result = new Float64Array(count);
 			let i = 0;
 			while (i < count) {
-				const u1 = random();
-				const v2 = random();
+				const u1 = urand();
+				const v2 = urand();
 				const u2 = (2 * v2 - 1) * RU_SCALE_CONSTANT;
 				const x = u2 / u1;
 				if ( (u1 * u1) <= stdExp(-0.5 * x * x)) {
@@ -199,23 +197,19 @@ function RU(seed, mean = 0, sd = 1) { //Ratio of uniforms
 		}
 	}
 
-	const _mean = function(u = undefined) {
-		if (u !== undefined) {
-			mean = u;
-		}
+	const _mean = function(u = mean) {
+		mean = u;
 		return mean;
 	}
 
-	const _sd = function(s = undefined) {
-		if (s !== undefined) {
-			sd = s;
-		}
+	const _sd = function(s = sd) {
+		sd = s;
 		return sd;
 	}
 
-	generator.seed = urand.seed;
-	generator.mean = Object.freeze(mean);
-	generator.sd = Object.freeze(sd);
+	generator.seed = urand.seed; //TODO: hash seed
+	generator.mean = Object.freeze(_mean);
+	generator.sd = Object.freeze(_sd);
 
 	return Object.freeze(generator);
 }
@@ -223,8 +217,8 @@ function RU(seed, mean = 0, sd = 1) { //Ratio of uniforms
 const Unif = Xorshift32;
 const Norm = RU;
 
-const Int = function(seed, range = [0, 1]) {
-	const urand = Xorshift32(seed, [ceil(range[0]), floor(range[1]) + 1]);
+const Int = function(a, b, seed = int(1, 4294967295)) {
+	const urand = Xorshift32(ceil(a), floor(b) + 1, seed); //TODO: hash seed
 
 	const generator = function(count = undefined) {
 		if (count === undefined) { //Return single value
@@ -238,28 +232,28 @@ const Int = function(seed, range = [0, 1]) {
 		}
 	}
 
-	const _range = function(r = undefined) {
-		if (r !== undefined) {
-			urand.range([ceil(r[0]), floor(r[1]) + 1]);
-		}
-		return urand.range();
+	const _range = function(r = a, s = b) {
+		a = r;
+		b = s;
+		urand.range(ceil(a), floor(b) + 1);
+		return [a, b];
 	}
 
-	generator.seed = urand.seed;
+	generator.seed = urand.seed; //TODO: hash seed
 	generator.range = Object.freeze(_range);
 
 	return Object.freeze(generator);
 }
 
 // Exponential
-function Exp(seed, lambda = 1) {
-	const urand = Xorshift32(seed);
+function Exp(lambda = 1, seed = int(1, 4294967295)) {
+	const urand = Xorshift32(0, 1, seed); //TODO: hash seed
 
 	const generator = function(count = undefined) {
 		if (count === undefined) { //Return single value
 			return -ln(urand()) / lambda;
 		} else { //Return array of values
-			result = new Float64Array(count);
+			const result = new Float64Array(count);
 			for (let i = 0; i < count; i++) {
 				result[i] = -ln(urand()) / lambda;
 			}

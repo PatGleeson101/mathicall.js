@@ -1,56 +1,62 @@
 import * as src from "./integer.src.js";
-import {assert, warn} from "../core/core.lib.js";
+import {assert, setContext, clearContext, warnif} from "../core/core.lib.js";
 
 function factorial(n) {
-	const signature = "factorial(n)";
-	assert.integer(n, "n", signature);
-	assert.nonNegative(n, "n", signature);
+	setContext("factorial(n)", arguments);
+	assert.integer("n");
+	assert.nonNegative("n");
 	const result = src.factorial(n);
-	warn.realOverflow(result, signature);
-	warn.intOverflow(result, signature);
+	warnif.realOverflow(result);
+	warnif.intOverflow(result);
+	clearContext();
 	return result;
 }
 
 function choose(n, r) {
-	const signature = "choose(n, r)";
-	assert.integer(n, "n", signature);
-	assert.integer(r, "r", signature);
+	setContext("choose(n, r)", arguments);
+	assert.integer("n");
+	assert.integer("r");
 	const result = src.choose(n, r);
-	warn.realOverflow(result, signature);
-	warn.intOverflow(result, signature);
+	warnif.realOverflow(result);
+	warnif.intOverflow(result);
+	clearContext();
 	return result;
 }
 
 function permute(n, r) {
-	const signature = "permute(n, r)";
-	assert.integer(n, "n", signature);
-	assert.integer(r, "r", signature);
+	setContext("permute(n, r)", arguments);
+	assert.integer("n");
+	assert.integer("r");
 	const result = src.permute(n, r);
-	warn.realOverflow(result, signature);
-	warn.intOverflow(result, signature);
+	warnif.realOverflow(result);
+	warnif.intOverflow(result);
+	clearContext();
 	return result;
 }
 
 function gcd(a, b) {
-	const signature = "gcd(a, b)";
-	assert.integer(a, "a", signature);
-	assert.integer(b, "b", signature);
+	setContext("gcd(a, b)", arguments);
+	assert.integer("a");
+	assert.integer("b");
+	clearContext();
 	return src.gcd(a, b);
 }
 
 function lcm(a, b) {
-	const signature = "lcm(a, b)";
-	assert.integer(a, "a", signature);
-	assert.integer(b, "b", signature);
+	setContext("lcm(a, b)", arguments);
+	assert.integer("a");
+	assert.integer("b");
+	clearContext();
 	return src.lcm(a, b);
 }
 
 function mpow(base, exp, m) {
-	const signature = "mpow(base, exp, m)";
-	assert.integer(base, "base", signature);
-	assert.integer(exp, "exp", signature);
-	assert.nonNegative(exp, "exp", signature);
-	assert.integer(m, "m", signature);
+	setContext("mpow(base, exp, m)", arguments);
+	assert.integer("base");
+	assert.integer("exp");
+	assert.nonNegative("exp");
+	assert.integer("m");
+	clearContext(0);
 	return src.mpow(base, exp, m);
 }
 

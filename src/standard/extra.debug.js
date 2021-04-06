@@ -1,44 +1,56 @@
-import {assert} from "../core/core.lib.js";
+import {assert, clearContext} from "../core/core.lib.js";
 import * as src from "./extra.src.js";
 
 function lerp(x, y, r) {
-	const signature = "lerp(x, y, r)";
-	assert.realNumber(x, "x", signature);
-	assert.realNumber(y, "y", signature);
-	assert.realNumber(r, "r", signature);
+	setContext("lerp(x, y, r)", arguments);
+	assert.realNumber("x");
+	assert.realNumber("y");
+	assert.realNumber("r");
+	clearContext();
 	return src.lerp(x, y, r);
 }
 
 function mod(x, m) {
-	const signature = "mod(x, m)";
-	assert.realNumber(x, "x", signature);
-	assert.realNumber(m, "m", signature);
+	setContext("mod(x, m)", arguments);
+	assert.realNumber("x");
+	assert.realNumber("m");
+	clearContext();
 	return src.mod(x, m);
 }
 
 function fract(x) {
-	const signature = "fract(x)";
-	assert.realNumber(x, "x", signature);
+	setContext("fract(x)", arguments);
+	assert.realNumber("x");
+	clearContext();
 	return src.fract(x);
 }
 
 function deg(radians) {
-	const signature = "deg(radians)";
-	assert.realNumber(radians, "radians", signature);
+	setContext("deg(radians)", arguments);
+	assert.realNumber("radians");
+	clearContext();
 	return src.deg(radians);
 }
 
 function rad(degrees) {
-	const signature = "rad(degrees)";
-	assert.realNumber(degrees, "degrees", signature);
+	setContext("rad(degrees)", arguments);
+	assert.realNumber('degrees');
+	clearContext();
 	return src.rad(degrees);
 }
 
 function linmap(x, domain, range) {
-	const signature = "linmap(x, domain, range)";
-	assert.realNumber(x, "x", signature);
-	//assert domain
-	//assert range
+	setContext("linmap(x, domain, range)", arguments);
+	assert.realNumber("x");
+	assert.realArray('domain');
+	assert.realArray('range');
+	if (domain[0] > domain[1]) {
+		throw "linmap(x, domain, range): invalid domain"
+	}
+	if (range[0] > range[1]) {
+		throw "linmap(x, domain, range): invalid range"
+	}
+	clearContext();
 	return src.linmap(x, domain, range);
 }
 

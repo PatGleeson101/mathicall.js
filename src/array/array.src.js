@@ -81,7 +81,7 @@ function imin(arr, sorted = false) {
 
 function prod(arr) {
 	const len = arr.length;
-	let result = arr[0]; //Defaults to undefined if array is empty
+	let result = 1; //By convention for empty array
 	for (let i = 1; i < len; i++) {
 		result *= arr[i];
 	}
@@ -155,7 +155,7 @@ function indexOf(arr, value, sorted = false) {
 		}
 		//Linear search for first occurrence once region becomes small enough
 		while (lowerBound <= upperBound) { 
-			if (array[lowerBound] === value) {return lowerBound;}
+			if (arr[lowerBound] === value) {return lowerBound;}
 			lowerBound++;
 		}
 	}
@@ -219,7 +219,7 @@ function union(arr1, arr2, sorted = false) {
 	}
 }
 
-function equal(arr1, arr2) {
+function isEqual(arr1, arr2) {
 	const len1 = arr1.length;
 	const len2 = arr2.length;
 	if (len1 !== len2) {return false;}
@@ -235,7 +235,7 @@ function sortUint8(arr, target = new Uint8Array(arr.length)) { //Radix sort
 	const buckets = new Uint32Array(256);
 	const len = arr.length;
 	for (let i = 0; i < len; i++) { //Count occurrences
-		buckets[arr[i]] += 1
+		buckets[arr[i]] += 1;
 	}
 	let j = 0;
 	for (let i = 0; i < 256; i++) {
@@ -347,11 +347,11 @@ Object.freeze(prod);
 Object.freeze(unique);
 Object.freeze(indexOf);
 Object.freeze(union);
-Object.freeze(equal);
+Object.freeze(isEqual);
 Object.freeze(sortUint8);
 Object.freeze(imin);
 Object.freeze(imax);
 Object.freeze(count);
 
 // Export exports
-export {sum, min, max, prod, unique, indexOf, union, equal, sortUint8, imin, imax, count}
+export {sum, min, max, prod, unique, indexOf, union, isEqual, sortUint8, imin, imax, count}
