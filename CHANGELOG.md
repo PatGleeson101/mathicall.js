@@ -1,6 +1,7 @@
 # Changelog
 
 #### Dev
+- Update `VERSION` to `beta-4.0.0`
 - Introduce basic unit testing
 - Re-introduce `random` sublibrary
 - Introduce new array functions, notably `count(arr, value)`

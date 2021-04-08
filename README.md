@@ -1,6 +1,6 @@
 # MathicallJS
 
-MathicallJS is a javascript library that connects different areas of mathematics under a single high-performance API.
+MathicallJS provides fast maths for applications such as simulation and data processing.
 
 [Usage](#usage) &mdash;
 [Features](#features) &mdash;
@@ -9,11 +9,10 @@ MathicallJS is a javascript library that connects different areas of mathematics
 [About](#about)
 
 ## Usage
-The MathicallJS library is currently available as both a static script (`mathicall.js`) and an ES6 module (`mathicall.module.js`), both of which can be found in the `build/` directory. To make use of MathicallJS, download the appropriate file to a convenient location (e.g. your project directory) and load it according to one of the examples below. MathicallJS is not currently available as an `npm` package.
+The library is currently available as a static script (`mathicall.js`) or ES6 module (`mathicall.module.js`), both found in the `build/` directory. After downloading the appropriate file to a convenient location, you can load it according to one of the examples below:
 
-### HTML
-#### mathicall.js
-Running `mathicall.js` in a HTML page creates a global `Mathicall` object through which you can access the library.
+### In the browser
+Running `mathicall.js` in a HTML page will create a global `Mathicall` object:
 ```html
 <!-- Run MathicallJS library script -->
 <script type="text/javascript" src="path/to/mathicall.js"></script>
@@ -23,13 +22,14 @@ Running `mathicall.js` in a HTML page creates a global `Mathicall` object throug
 	Mathicall.standard.fract(1.577); //0.577
 </script>
 ```
-
-#### mathicall.module.js
-Loading `mathicall.module.js` in a HTML page is not recommended, but possible. The following example creates a `Mathicall` object from the module. Note that due to web-browsers' _CORS_ policy, modules can only be included in HTML pages hosted by a web server; if you're loading a HTML page statically (e.g. using a browser to open a .html file), use the previous `mathicall.js` example.
+Alternatively, a HTML page can load `mathicall.module.js`. Due to web browsers' _CORS_ policy, this is only possible for pages hosted by a web server; for static pages, use the previous `mathicall.js` example.
 ```html
 <!-- Load MathicallJS module inside module script -->
 <script type="module">
 	import * as Mathicall from "path/to/mathicall.module.js";
+	//Use library here...
+	Mathicall.array.count([1,4,4,3], 4); //2
+	//Or attach it to the window for use elsewhere:
 	window.Mathicall = Mathicall;
 </script>
 
@@ -40,7 +40,7 @@ Loading `mathicall.module.js` in a HTML page is not recommended, but possible. T
 ```
 
 ### Module or Node.js
-Other ES6 modules and sufficiently-recent Node.js versions (at or above 13.2.0) can include `mathicall.module.js` using normal ES6 syntax:
+ES6 modules and sufficiently-recent Node.js versions (at or above 13.2.0) can include `mathicall.module.js` using ES6 syntax:
 ##### Example 1
 ```javascript
 import * as Mathicall from "path/to/mathicall.module.js";
@@ -57,42 +57,45 @@ import {vector} from "path/to/mathicall.module.js";
 vector.rect.dot([1, 2], [0.5, 3]); //6.5
 ```
 
+
 ## Features
 - Common functions (e.g. lerp, mod)
 - Vectors
 - Matrices
-- Random numbers (returning soon)
-- Random noise (returning soon)
+- Random numbers
 - Complex numbers
-- Array operations (e.g. sum)
+- Array operations
+- Statistics
 - Integer operations (e.g. greatest common divisor)
 
 For work-in-progress and proposed features, see [Future development](https://github.com/PatGleeson101/mathicall.js/wiki/Future-development).
 
 
 ## Documentation
-Documentation for MathicallJS can be found at its GitHub wiki - see specifically the [Getting started guide](https://github.com/PatGleeson101/mathicall.js/wiki/Getting-started) and the [API documentation](https://github.com/PatGleeson101/mathicall.js/wiki/API-documentation)
+Documentation for MathicallJS can be found on its GitHub wiki - see specifically the [Getting started guide](https://github.com/PatGleeson101/mathicall.js/wiki/Getting-started) and [API documentation](https://github.com/PatGleeson101/mathicall.js/wiki/API-documentation).
+
 
 ## Licence
 MathicallJS is provided under the [MIT licence](LICENCE).
 
+
 ## About
 ### Origin
-MathicallJS originally grew from a javascript implementation of 3D [Perlin noise](https://en.wikipedia.org/wiki/Perlin_noise) for a terrain-generation project. Attempts to improve performance revealed the benefits of combining efficient algorithms with a knowledge of javascript's quirks and features, as well as the need for interconnection between different mathematical fields to produce tools like Perlin noise. This led to the idea of a javascript API that would allow mathematics to be both fast and interdependent.
+A few years ago I created a simple terrain generator consisting of a basic 3D graphics engine and an implementation of 2D [Perlin noise](https://en.wikipedia.org/wiki/Perlin_noise). The project required a combination of good performance and several areas of maths - namely vectors, matrices and random numbers. MathicallJS was designed to make this as easy as possible, by taking advantage of efficient algorithms, javascript's quirks and a thought-out API.
 
 ### Aim
-MathicallJS aims to provide a common, robust API for different areas of mathematics, while maintaining the speed required for data-intensive applications such as image processing and realtime simulation. Specifically, the library aims:
+MathicallJS aims to provide a common, robust API for different areas of mathematics, while maintaining the speed required for data-intensive applications such as image processing and realtime simulation. Specifically, the library aims to provide:
 
-1. _**To provide fast mathematics by implementing efficient algorithms that are tailored to the javascript language.**_
-2. _**To provide a consistent, well-structured API that gives simple, powerful control over these functions and how they are combined.**_
+1. _**Fast mathematics by implementing efficient algorithms tailored to javascript.**_
+2. _**A consistent, well-structured API that makes combining these functions as simple and powerful as possible.**_
 
-A key consideration in the design of MathicallJS is leveraging features and optimisations that are shared by different areas of maths. If this is successful, becoming familiar with just a few [Fundamentals](https://github.com/PatGleeson101/mathicall.js/wiki/Getting-started#Fundamentals) should give access to a wide range of fast mathematics. By making these basic features as intuitive as possible, we hope to make MathicallJS worthwhile even in applications that don't demand high performance.
+A key consideration in the design of MathicallJS is leveraging features and optimisations shared by several areas of maths. If this is successful, becoming familiar with just a few [Fundamentals](https://github.com/PatGleeson101/mathicall.js/wiki/Getting-started#Fundamentals) should make it easy to use and combine a large number of fast functions. These basics are hopefully intuitive enough for MathicallJS to be worthwhile even in applications that don't demand high performance.
 
 
 ### Influences
-Several other tools have influenced MathicallJS:
+Below are some existing tools which have influenced MathicallJS.
 
-- The basic repository structure was inspired by [three.js](https://github.com/mrdoob/three.js/).
+- The repository structure is based on [three.js](https://github.com/mrdoob/three.js/).
 - The API structure is similar to python libraries such as [matplotlib](https://matplotlib.org/) and [NumPy](https://numpy.org/).
-- The choice, naming, and categorising of several functions were influenced by [GLSL](https://en.wikipedia.org/wiki/OpenGL_Shading_Language) and the [TI-84 Plus CE](https://education.ti.com/en-au/products/calculators/graphing-calculators/ti-84-plus-ce) graphing calculator.
-- The detachment of debugging from function implementation in order to maintain speed was inspired by the use of validation layers in the [Vulkan API](https://en.wikipedia.org/wiki/Vulkan_(API)).
+- Several functions are inspired by counterparts found in [GLSL](https://en.wikipedia.org/wiki/OpenGL_Shading_Language), [SciPy](https://www.scipy.org/), the [R](https://www.r-project.org/) language and the [TI-84 Plus CE](https://education.ti.com/en-au/products/calculators/graphing-calculators/ti-84-plus-ce) graphing calculator.
+- The detachment of debugging from source functionality was prompted by the use of validation layers in the [Vulkan API](https://en.wikipedia.org/wiki/Vulkan_(API)).
