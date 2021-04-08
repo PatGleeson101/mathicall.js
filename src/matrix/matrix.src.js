@@ -143,7 +143,7 @@ function mmult(mat1, mat2) { //consider adding target parameter
 
 //Size
 function size(mat) {
-	return [mat.rnows, mat.ncols];
+	return [mat.nrows, mat.ncols];
 }
 
 //Determinant
