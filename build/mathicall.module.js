@@ -1530,7 +1530,7 @@ function mmult(mat1, mat2) { //consider adding target parameter
 
 //Size
 function size(mat) {
-	return [mat.rnows, mat.ncols];
+	return [mat.nrows, mat.ncols];
 }
 
 //Determinant
@@ -3296,6 +3296,6 @@ var random_lib = /*#__PURE__*/Object.freeze({
     Exp: Exp
 });
 
-const VERSION = "beta-3.0.0";
+const VERSION = "beta-4.0.0";
 
 export { VERSION, array_lib as array, complex_lib as complex, integer_lib as integer, matrix_lib as matrix, numerical_lib as numerical, random_lib as random, standard_lib as standard, statistics_lib as statistics, vector_lib as vector };

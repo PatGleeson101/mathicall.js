@@ -1533,7 +1533,7 @@ var Mathicall = (function (exports) {
 
     //Size
     function size(mat) {
-    	return [mat.rnows, mat.ncols];
+    	return [mat.nrows, mat.ncols];
     }
 
     //Determinant
@@ -3299,7 +3299,7 @@ var Mathicall = (function (exports) {
         Exp: Exp
     });
 
-    const VERSION = "beta-3.0.0";
+    const VERSION = "beta-4.0.0";
 
     exports.VERSION = VERSION;
     exports.array = array_lib;
