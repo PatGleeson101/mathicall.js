@@ -8,4 +8,4 @@ export * as statistics from "./statistics/statistics.lib.js";
 export * as numerical from "./numerical/numerical.lib.js";
 export * as random from "./random/random.lib.js";
 
-export const VERSION = "beta-4.0.0";
+export const VERSION = "dev-1.0.0";

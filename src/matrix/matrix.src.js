@@ -1,4 +1,3 @@
-import { array } from "../../build/mathicall.module.js";
 import {isEqual as isArrayEqual} from "../array/array.src.js";
 
 function zeros(nrows, ncols) {
@@ -217,7 +216,7 @@ function isEqual(mat1, mat2) {
 	if ( (mat1.nrows !== mat2.nrows) || (mat1.ncols !== mat2.ncols) ) {
 		return false;
 	}
-	return array.isArrayEqual(mat1, mat2);
+	return isArrayEqual(mat1, mat2);
 }
 
 // Freeze exports
