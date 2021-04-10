@@ -45,9 +45,24 @@ function bool(label) {
     }
 }
 
+function nonNegative(label) {
+    const value = args[label];
+    if (value === undefined) {return;}
+    assert.nonNegative(label);
+}
+
+function nonNegativeInteger(label) {
+    const value = args[label];
+    if (value === undefined) {return;}
+    assert.nonNegative(label);
+    assert.integer(label);
+}
+
 Object.freeze(realNumber);
 Object.freeze(sorted);
 Object.freeze(target);
 Object.freeze(bool);
+Object.freeze(nonNegativeInteger);
+Object.freeze(nonNegative);
 
-export {realNumber, sorted, target, bool}
+export {realNumber, sorted, target, bool, nonNegativeInteger, nonNegative}

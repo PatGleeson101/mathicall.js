@@ -108,7 +108,7 @@ function mag4(vec) {
 }
 
 //Scaling
-function smult(vec, k, target = new Float64Array(vec.length)) {
+function scale(vec, k, target = new Float64Array(vec.length)) {
 	const dimension = vec.length;
 	for (let i = 0; i < dimension; i++) {
 		target[i] = vec[i] * k;
@@ -116,20 +116,20 @@ function smult(vec, k, target = new Float64Array(vec.length)) {
 	return target;
 }
 
-function smult2(vec, k, target = new Float64Array(2)) {
+function scale2(vec, k, target = new Float64Array(2)) {
 	target[0] = vec[0] * k;
 	target[1] = vec[1] * k;
 	return target;
 }
 
-function smult3(vec, k, target = new Float64Array(3)) {
+function scale3(vec, k, target = new Float64Array(3)) {
 	target[0] = vec[0] * k;
 	target[1] = vec[1] * k;
 	target[2] = vec[2] * k;
 	return target;
 }
 
-function smult4(vec, k, target = new Float64Array(4)) {
+function scale4(vec, k, target = new Float64Array(4)) {
 	target[0] = vec[0] * k;
 	target[1] = vec[1] * k;
 	target[2] = vec[2] * k;
@@ -200,9 +200,10 @@ function fract4(vec, target = new Float64Array(4)) {
 	return target;
 }
 
-function polar2(vec, target = new Float64Array(2)) {
+function toPolar2(vec, target = new Float64Array(2)) {
 	target[0] = mag2(vec);
 	target[1] = atan2(vec[1], vec[0]) + PI;
+	return target;
 }
 
 // Freeze exports
@@ -223,10 +224,10 @@ Object.freeze(mag);
 Object.freeze(mag2);
 Object.freeze(mag3);
 Object.freeze(mag4);
-Object.freeze(smult);
-Object.freeze(smult2);
-Object.freeze(smult3);
-Object.freeze(smult4);
+Object.freeze(scale);
+Object.freeze(scale2);
+Object.freeze(scale3);
+Object.freeze(scale4);
 Object.freeze(normalize);
 Object.freeze(normalize2);
 Object.freeze(normalize3);
@@ -239,10 +240,10 @@ Object.freeze(fract);
 Object.freeze(fract2);
 Object.freeze(fract3);
 Object.freeze(fract4);
-Object.freeze(polar2);
+Object.freeze(toPolar2);
 
 // Export
 export {dot, dot2, dot3, dot4, cross3, add, add2, add3, add4}
 export {sub, sub2, sub3, sub4, mag, mag2, mag3, mag4}
-export {smult, smult2, smult3, smult4, normalize, normalize2, normalize3, normalize4}
-export {angle, angle2, angle3, angle4, fract, fract2, fract3, fract4, polar2}
+export {scale, scale2, scale3, scale4, normalize, normalize2, normalize3, normalize4}
+export {angle, angle2, angle3, angle4, fract, fract2, fract3, fract4, toPolar2}

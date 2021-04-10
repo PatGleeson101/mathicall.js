@@ -34,7 +34,7 @@ function sub(z1, z2, target = new Float64Array(2)) {
 	return target;
 }
 
-function cmult(z1, z2, target = new Float64Array(2)) {
+function mult(z1, z2, target = new Float64Array(2)) {
 	const re1 = z1[0];
 	const im1 = z1[1];
 	const re2 = z2[0];
@@ -44,7 +44,7 @@ function cmult(z1, z2, target = new Float64Array(2)) {
 	return target;
 }
 
-function smult(z, k, target = new Float64Array(2)) {
+function scale(z, k, target = new Float64Array(2)) {
 	target[0] = z[0] * k;
 	target[1] = z[1] * k;
 	return target;
@@ -70,7 +70,7 @@ function inverse(z, target = new Float64Array(2)) {
 	return target;
 }
 
-function polar(z, target = new Float64Array(2)) {
+function toPolar(z, target = new Float64Array(2)) {
 	const re = z[0];
 	const im = z[1];
 	const r = hypot(re, im);
@@ -87,11 +87,11 @@ Object.freeze(arg);
 Object.freeze(abs);
 Object.freeze(add);
 Object.freeze(sub);
-Object.freeze(cmult);
-Object.freeze(smult);
+Object.freeze(mult);
+Object.freeze(scale);
 Object.freeze(div);
 Object.freeze(inverse);
-Object.freeze(polar);
+Object.freeze(toPolar);
 
 // Export
-export {conj, real, imag, arg, abs, add, sub, cmult, smult, div, inverse, polar}
+export {conj, real, imag, arg, abs, add, sub, mult, scale, div, inverse, toPolar}

@@ -1,6 +1,7 @@
 import {round, abs, min, MAX_VALUE} from "../standard/standard.lib.js";
 
 function computeFactorials(n = 170) { //n > 170 overflows JS's Number type
+	if (n < 0) {return [];}
 	const len = n + 1;
 	const result = new Float64Array(len);
 	result[0] = 1;
@@ -60,8 +61,8 @@ function choose(n, r) {
 
 function permute(n, r) {
 	if ((r > n) || (n < 0) || (r < 0)) {return 0;}
-	if (r > 170) {return MAX_VALUE;}
 	r = n - r;
+	if (r > 170) {return MAX_VALUE;}
 	if (n < 171) {
 		return round(FACTORIALS[n]/FACTORIALS[r]);
 	}

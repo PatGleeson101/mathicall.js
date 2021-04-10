@@ -1,7 +1,13 @@
 # Changelog
 
-#### Dev
-- Update `VERSION` to `beta-4.0.0`
+#### Dev 1.0.0
+- Rename `smult` to `scale` in `complex`, `matrix` and `vector` sublibraries.
+- Make rectangular form directly accessible through `vector` and `complex` by default. These functions can still be accessed through `vector.rect` and `complex.rect` as well.
+- Switch to Jest for unit testing
+- Introduce Perlin noise
+- Add basic examples
+
+#### beta-4.0.0
 - Introduce basic unit testing
 - Re-introduce `random` sublibrary
 - Introduce new array functions, notably `count(arr, value)`

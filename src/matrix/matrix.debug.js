@@ -25,22 +25,16 @@ function identity(m) {
     return src.identity(m);
 }
 
-/*
-function flatten(mat2d, target) { //Flattens 2D array into 1D array
-	setContext("flatten(mat2d, ?target)", arguments);
-    //assert that mat2d is valid 2d unflattened matrix
-    //assert target
-    return src.flatten(mat2d, target);
-}*/
+//TODO: debug for 'flatten
 
 //Scaling
-function smult(mat, k, target) {
-	setContext("smult(mat, k, target)", arguments);
+function scale(mat, k, target) {
+	setContext("scale(mat, k, target)", arguments);
     assert.flatMatrix("mat");
     assert.realNumber("k");
     optional.target('target', mat.length);
     clearContext();
-    return src.smult(mat, k, target);
+    return src.scale(mat, k, target);
 }
 
 //Transpose
@@ -69,12 +63,12 @@ function transpose4x4(mat, target) {
 }
 
 //Matrix multiplication
-function mmult(mat1, mat2) {
-	setContext("mmult(mat1, mat2)", arguments);
+function mult(mat1, mat2) {
+	setContext("mult(mat1, mat2)", arguments);
 	assert.flatMatrix("mat1");
 	assert.flatMatrix("mat2", mat1.ncols);
     clearContext();
-    return src.mmult(mat1, mat2);
+    return src.mult(mat1, mat2);
 }
 
 //Size
@@ -107,16 +101,16 @@ Object.freeze(zeros);
 Object.freeze(constant);
 Object.freeze(identity);
 //Object.freeze(flatten);
-Object.freeze(smult);
+Object.freeze(scale);
 Object.freeze(transpose2x2);
 Object.freeze(transpose3x3);
 Object.freeze(transpose4x4);
-Object.freeze(mmult);
+Object.freeze(mult);
 Object.freeze(size);
 Object.freeze(det2x2);
 Object.freeze(inverse2x2);
 
 // Export
-export {zeros, constant, identity, smult, transpose2x2 }
-export { transpose3x3, transpose4x4, mmult, size, det2x2, inverse2x2 }
+export {zeros, constant, identity, scale, transpose2x2 }
+export { transpose3x3, transpose4x4, mult, size, det2x2, inverse2x2 }
 //export {flatten}

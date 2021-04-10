@@ -1,10 +1,6 @@
 import {abs, floor, EPSILON} from "../standard/standard.lib.js";
 
-function frac(num, tolerance = undefined) { //Farey rational approximation algorithm
-	if (tolerance === undefined) {
-		tolerance = num * EPSILON;
-	}
-
+function frac(num, tolerance = num * EPSILON) { //Farey rational approximation algorithm
 	const wholePart = floor(num);
 	const fractionalPart = num - whole;
 	let leftNumerator = 0;
@@ -29,7 +25,7 @@ function frac(num, tolerance = undefined) { //Farey rational approximation algor
 		currentValue = numerator / denominator;
 	}
 	const result = new Int32Array(2);
-	result[0] = numerator;
+	result[0] = numerator + denominator * wholePart;
 	result[1] = denominator;
 	return result;
 }

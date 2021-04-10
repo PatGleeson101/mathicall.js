@@ -1,5 +1,4 @@
 import {E, ln, exp as stdExp, random, floor, ceil, abs, sqrt, trunc} from "../standard/standard.lib.js";
-import { sdev } from "../statistics/statistics.src.js";
 
 //Constants
 // Ratio-of-uniforms

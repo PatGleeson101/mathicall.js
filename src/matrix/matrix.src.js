@@ -1,3 +1,6 @@
+import { array } from "../../build/mathicall.module.js";
+import {isEqual as isArrayEqual} from "../array/array.src.js";
+
 function zeros(nrows, ncols) {
 	const result = new Float64Array(nrows * ncols);
 	result.nrows = nrows;
@@ -33,13 +36,13 @@ function flatten(mat2d, target = new Float64Array(mat2d.length * mat2d[0].length
 			target[i * rows + j] = mat2d[i][j];
 		}
 	}
-	target.rows = rows;
-	target.cols = cols;
+	target.nrows = rows;
+	target.ncols = cols;
 	return target;
 }
 
 //Scaling
-function smult(mat, k, target = new Float64Array(mat.length)) {
+function scale(mat, k, target = new Float64Array(mat.length)) {
 	const len = mat.length;
 	for (let i = 0; i < len; i++) {
 		target[i] = mat[i] * k;
@@ -114,7 +117,7 @@ function transpose4x4(mat, target = new Float64Array(16)) {
 }
 
 //Matrix multiplication
-function mmult(mat1, mat2) { //consider adding target parameter
+function mult(mat1, mat2) { //consider adding target parameter
 	const r1 = mat1.nrows;
 	const c1 = mat1.ncols;
 	const r2 = mat2.nrows;
@@ -189,9 +192,9 @@ function vmult2x2(vec, mat) {
 	const target = new Float64Array(2);
 	const v0 = vec[0];
 	const v1 = vec[1];
-	target[0] = v1 * mat[0] + v2 * mat[2];
-	target[0] = v1 * mat[1] + v2 * mat[3];
-	return target
+	target[0] = v0 * mat[0] + v1 * mat[2];
+	target[0] = v0 * mat[1] + v1 * mat[3];
+	return target;
 }
 
 function multv(mat, vec) {
@@ -210,23 +213,31 @@ function multv(mat, vec) {
 	return target;
 }
 
+function isEqual(mat1, mat2) {
+	if ( (mat1.nrows !== mat2.nrows) || (mat1.ncols !== mat2.ncols) ) {
+		return false;
+	}
+	return array.isArrayEqual(mat1, mat2);
+}
+
 // Freeze exports
 Object.freeze(zeros);
 Object.freeze(constant);
 Object.freeze(identity);
 Object.freeze(flatten);
-Object.freeze(smult);
+Object.freeze(scale);
 Object.freeze(transpose2x2);
 Object.freeze(transpose3x3);
 Object.freeze(transpose4x4);
-Object.freeze(mmult);
+Object.freeze(mult);
 Object.freeze(size);
 Object.freeze(det2x2);
 Object.freeze(inverse2x2);
 Object.freeze(vmult);
 Object.freeze(vmult2x2);
 Object.freeze(multv);
+Object.freeze(isEqual);
 
 // Export
-export {zeros, constant, identity, flatten, smult, transpose2x2, transpose3x3, transpose4x4, mmult, size, det2x2, inverse2x2}
-export {vmult, vmult2x2, multv}
+export {zeros, constant, identity, flatten, scale, transpose2x2, transpose3x3, transpose4x4, mult, size, det2x2, inverse2x2}
+export {vmult, vmult2x2, multv, isEqual}

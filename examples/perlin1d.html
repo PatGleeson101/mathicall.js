@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>1D Perlin Noise</title>
+</head>
+
+<body>
+    <canvas id="perlin-canvas"></canvas>
+    <script type="text/javascript" src="../build/mathicall.js"></script>
+    <script type="text/javascript">
+        const canvas = document.getElementById("perlin-canvas");
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        canvas.width = w;
+        canvas.height = h;
+
+        const ctx = canvas.getContext("2d");
+
+        const perlin = Mathicall.random.Perlin1D([0, h]);
+        ctx.beginPath()
+        ctx.moveTo(0, perlin(0));
+        for (let x = 0; x < w; x++) {
+            const y = perlin(x * 0.01);
+            ctx.lineTo(x, y);
+        }
+        ctx.stroke()
+        ctx.closePath();
+
+    </script>
+</body>
+
+</html>

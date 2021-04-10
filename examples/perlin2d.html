@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>2D Perlin Noise</title>
+</head>
+
+<body>
+    <canvas id="perlin-canvas"></canvas>
+    <script type="text/javascript" src="../build/mathicall.js"></script>
+    <script type="text/javascript">
+        const canvas = document.getElementById("perlin-canvas");
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        canvas.width = w;
+        canvas.height = h;
+
+        const ctx = canvas.getContext("2d");
+
+        const perlin = Mathicall.random.Perlin2D([0, 256]);
+        const imageData = ctx.getImageData(0, 0, w, h);
+        const gridData = perlin.grid(0, 0, w, h, 0.01, 0.01);
+        
+        for (let i = 0; i < w * h; i++) {
+            let index = 4 * i;
+            imageData.data[index++] = gridData[i];
+            imageData.data[index++] = gridData[i];
+            imageData.data[index++] = gridData[i];
+            imageData.data[index] = 255;
+        }
+        ctx.putImageData(imageData, 0, 0);
+
+    </script>
+</body>
+
+</html>

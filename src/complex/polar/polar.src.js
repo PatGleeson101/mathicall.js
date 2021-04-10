@@ -36,7 +36,7 @@ function abs(z) {
 	return stdAbs(z[0]);
 }
 
-function smult(z, k, target = new Float64Array(2)) {
+function scale(z, k, target = new Float64Array(2)) {
 	const r = z[0] * k;
 	const theta = z[1];
 	if (r < 0) {
@@ -49,7 +49,7 @@ function smult(z, k, target = new Float64Array(2)) {
 	return target;
 }
 
-function cmult(z1, z2, target = new Float64Array(2)) {
+function mult(z1, z2, target = new Float64Array(2)) {
 	const r = z1[0] * z2[0];
 	const theta = z1[1] + z2[1];
 	if (r < 0) {
@@ -104,7 +104,7 @@ function inverse(z, target = new Float64Array(2)) {
 	return target;
 }
 
-function rect(z, target = new Float64Array(2)) {
+function toRect(z, target = new Float64Array(2)) {
 	const r = z[0];
 	const theta = z[1];
 	target[0] = r * cos(theta);
@@ -113,17 +113,17 @@ function rect(z, target = new Float64Array(2)) {
 }
 
 // Freeze exports
-Object.freeze(conj)
-Object.freeze(real)
-Object.freeze(imag)
-Object.freeze(arg)
-Object.freeze(abs)
-Object.freeze(smult)
-Object.freeze(cmult)
-Object.freeze(div)
-Object.freeze(pow)
-Object.freeze(inverse)
-Object.freeze(rect)
+Object.freeze(conj);
+Object.freeze(real);
+Object.freeze(imag);
+Object.freeze(arg);
+Object.freeze(abs);
+Object.freeze(scale);
+Object.freeze(mult);
+Object.freeze(div);
+Object.freeze(pow);
+Object.freeze(inverse);
+Object.freeze(toRect);
 
 // Export
-export {conj, real, imag, arg, abs, smult, cmult, div, pow, inverse, rect}
+export {conj, real, imag, arg, abs, scale, mult, div, pow, inverse, toRect}

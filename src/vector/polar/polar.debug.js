@@ -16,13 +16,13 @@ function mag(vec) {
 	return src.mag(vec);
 }
 
-function smult2(vec, k, target) {
-	setContext("smult2(vec, k, ?target)", arguments);
+function scale2(vec, k, target) {
+	setContext("scale2(vec, k, ?target)", arguments);
 	assert.realArray("vec", 2);
 	assert.realNumber("k");
 	optional.target('target', 2);
 	clearContext();
-	return src.smult2(vec, k, target);
+	return src.scale2(vec, k, target);
 }
 
 function normalize2(vec, target) {
@@ -33,20 +33,20 @@ function normalize2(vec, target) {
 	return src.normalize2(vec, target);
 }
 
-function rect2(vec, target) {
-	setContext("rect2(vec, ?target)", arguments);
+function toRect2(vec, target) {
+	setContext("toRect2(vec, ?target)", arguments);
 	assert.realArray("vec", 2);
 	optional.target('target', 2);
 	clearContext();
-	return src.rect2(vec, target);
+	return src.roRect2(vec, target);
 }
 
 // Freeze exports
 Object.freeze(dot2);
 Object.freeze(mag);
-Object.freeze(smult2);
+Object.freeze(scale2);
 Object.freeze(normalize2);
-Object.freeze(rect2);
+Object.freeze(toRect2);
 
 // Export
-export {dot2, mag, smult2, normalize2, rect2}
+export {dot2, mag, scale2, normalize2, toRect2}

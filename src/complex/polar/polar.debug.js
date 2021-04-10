@@ -37,21 +37,21 @@ function abs(z) {
 	return src.abs(z);
 }
 
-function smult(z, k, target) {
-    setContext("smult(z, k, ?target)", arguments);
+function scale(z, k, target) {
+    setContext("scale(z, k, ?target)", arguments);
 	assert.polarComplex("z");
     assert.realNumber("k");
     optional.target('target', 2);
     clearContext();
-    return src.smult(z, k, target);
+    return src.scale(z, k, target);
 }
 
-function cmult(z1, z2, target) {
-	setContext("cmult(z1, z2, ?target)", arguments);
+function mult(z1, z2, target) {
+	setContext("mult(z1, z2, ?target)", arguments);
 	assert.polarComplex("z1");
     assert.polarComplex("z2");
     optional.target('target', 2);
-    return src.cmult(z1, z2, target);
+    return src.mult(z1, z2, target);
 }
 
 function div(z1, z2, target) {
@@ -82,12 +82,12 @@ function inverse(z, target) {
     return src.inverse(z, target);
 }
 
-function rect(z, target) {
-	setContext("rect(z, ?target)", arguments);
+function toRect(z, target) {
+	setContext("toRect(z, ?target)", arguments);
     assert.polarComplex("z");
     optional.target('target', 2);
     clearContext();
-    return src.rect(z, target);
+    return src.toRect(z, target);
 }
 
 // Freeze exports
@@ -96,12 +96,12 @@ Object.freeze(real)
 Object.freeze(imag)
 Object.freeze(arg)
 Object.freeze(abs)
-Object.freeze(smult)
-Object.freeze(cmult)
+Object.freeze(scale)
+Object.freeze(mult)
 Object.freeze(div)
 Object.freeze(pow)
 Object.freeze(inverse)
-Object.freeze(rect)
+Object.freeze(toRect)
 
 // Export
-export {conj, real, imag, arg, abs, smult, cmult, div, pow, inverse, rect}
+export {conj, real, imag, arg, abs, scale, mult, div, pow, inverse, toRect}

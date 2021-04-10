@@ -148,36 +148,36 @@ function mag4(vec) {
 }
 
 //Scaling
-function smult(vec, k, target) {
-	setContext("smult(vec, k, ?target)", arguments);
+function scale(vec, k, target) {
+	setContext("scale(vec, k, ?target)", arguments);
 	assert.realArray("vec");
 	assert.realNumber("k");
 	optional.target('target', vec.length);
-	return src.smult(vec, k, target);
+	return src.scale(vec, k, target);
 }
 
-function smult2(vec, k, target) {
-	setContext("smult2(vec, k, ?target)", arguments);
+function scale2(vec, k, target) {
+	setContext("scale2(vec, k, ?target)", arguments);
 	assert.realArray("vec", 2);
 	assert.realNumber("k");
 	optional.target('target', 2);
-	return src.smult2(vec, k, target);
+	return src.scale2(vec, k, target);
 }
 
-function smult3(vec, k, target) {
-	setContext("smult3(vec, k, ?target)", arguments);
+function scale3(vec, k, target) {
+	setContext("scale3(vec, k, ?target)", arguments);
 	assert.realArray("vec", 3);
 	assert.realNumber("k");
 	optional.target('target', 3);
-	return src.smult3(vec, k, target);
+	return src.scale3(vec, k, target);
 }
 
-function smult4(vec, k, target) {
-	setContext("smult4(vec, k, ?target)", arguments);
+function scale4(vec, k, target) {
+	setContext("scale4(vec, k, ?target)", arguments);
 	assert.realArray("vec", 4);
 	assert.realNumber("k");
 	optional.target('target', 4);
-	return src.smult4(vec, k, target);
+	return src.scale4(vec, k, target);
 }
 
 function normalize(vec, target) { //'target' intentionally defaults to undefined
@@ -266,11 +266,11 @@ function fract4(vec, target) {
 	return src.fract4(vec, target);
 }
 
-function polar2(vec, target) {
+function toPolar2(vec, target) {
 	setContext("polar2(vec, ?target)", arguments);
 	assert.realArray("vec", 2);
 	optional.target("target", 2);
-	return src.polar2(vec, target);
+	return src.toPolar2(vec, target);
 }
 
 // Freeze exports
@@ -291,10 +291,10 @@ Object.freeze(mag);
 Object.freeze(mag2);
 Object.freeze(mag3);
 Object.freeze(mag4);
-Object.freeze(smult);
-Object.freeze(smult2);
-Object.freeze(smult3);
-Object.freeze(smult4);
+Object.freeze(scale);
+Object.freeze(scale2);
+Object.freeze(scale3);
+Object.freeze(scale4);
 Object.freeze(normalize);
 Object.freeze(normalize2);
 Object.freeze(normalize3);
@@ -307,10 +307,10 @@ Object.freeze(fract);
 Object.freeze(fract2);
 Object.freeze(fract3);
 Object.freeze(fract4);
-Object.freeze(polar2);
+Object.freeze(toPolar2);
 
 // Export
 export {dot, dot2, dot3, dot4, cross3, add, add2, add3, add4}
 export {sub, sub2, sub3, sub4, mag, mag2, mag3, mag4}
-export {smult, smult2, smult3, smult4, normalize, normalize2, normalize3, normalize4}
-export {angle, angle2, angle3, angle4, fract, fract2, fract3, fract4, polar2}
+export {scale, scale2, scale3, scale4, normalize, normalize2, normalize3, normalize4}
+export {angle, angle2, angle3, angle4, fract, fract2, fract3, fract4, toPolar2}
