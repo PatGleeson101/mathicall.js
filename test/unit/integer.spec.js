@@ -60,7 +60,7 @@ describe("permute", () => {
         expect(Math.log10(integer.permute(180, 150))).toBeCloseTo(296.8793, 1);
     });
     test("n > 170, r > 170 (overflow)", () => {
-        expect(integer.permute(300, 280)).toBeCloseTo(Number.MAX_VALUE);
+        expect(integer.permute(300, 280)).toBeGreaterThanOrEqual(Number.MAX_VALUE);
     });
 });
 

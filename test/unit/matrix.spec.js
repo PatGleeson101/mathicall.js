@@ -21,10 +21,10 @@ test("scale", () => {
     expect(matrix.scale([], 2)).toEqual(new Float64Array([]));
 });
 
-const mat4x4 = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16];
+const mat4x4 = new Float64Array([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]);
 mat4x4.nrows = 4;
 mat4x4.ncols = 4;
-const mat4x4T = [1,5,9,13,2,6,10,14,3,7,11,15,4,8,12,16];
+const mat4x4T = new Float64Array([1,5,9,13,2,6,10,14,3,7,11,15,4,8,12,16]);
 mat4x4T.nrows = 4;
 mat4x4T.ncols = 4;
 

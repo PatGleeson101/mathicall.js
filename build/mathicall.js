@@ -2245,9 +2245,9 @@ var Mathicall = (function (exports) {
     function inverse(z, target = new Float64Array(2)) {
     	const re = z[0];
     	const im = z[1];
-    	const scale = 1 / (re2 * re2 + im2 * im2);
-    	target[0] = (re1 * re2 + im1 * im2) * scale;
-    	target[1] = (-re1 * im2 - re2 * im1) * scale;
+    	const scale = 1 / (re * re + im * im);
+    	target[0] = (re * re + im * im) * scale;
+    	target[1] = (- re * im - re * im) * scale;
     	return target;
     }
 
@@ -3021,17 +3021,17 @@ var Mathicall = (function (exports) {
         expInvCdf: expInvCdf
     });
 
-    function frac(num, tolerance = num * EPSILON) { //Farey rational approximation algorithm
+    function frac(num, tolerance = num * EPSILON * 10) { //Farey rational approximation algorithm
     	const wholePart = floor(num);
-    	const fractionalPart = num - whole;
+    	const fractionalPart = num - wholePart;
     	let leftNumerator = 0;
     	let leftDenominator = 1;
     	let rightNumerator = 1;
     	let rightDenominator = 1;
-    	let numerator = 1;
-    	let denominator = 2;
+    	let numerator = leftNumerator;
+    	let denominator = leftDenominator;
     	let currentValue = numerator / denominator;
-    	while (abs(currentValue - num) > tolerance) {
+    	while (abs(currentValue - fractionalPart) > tolerance) {
     		if (fractionalPart > currentValue) {
     			leftNumerator = numerator;
     			leftDenominator = denominator;
@@ -3051,10 +3051,12 @@ var Mathicall = (function (exports) {
     	return result;
     }
 
+    const epsilon = Math.cbrt(EPSILON);
     function deriv(f, x) {
-    	x0 = x * (1 + EPSILON);
-    	x1 = x * (1 - EPSILON);
-    	dx = x1 - x0;
+    	const x0 = x * (1 + epsilon);
+    	const x1 = x * (1 - epsilon);
+    	const dx = x1 - x0;
+    	console.log(dx);
     	return (f(x1) - f(x0)) / dx;
     }
 
@@ -3823,7 +3825,7 @@ var Mathicall = (function (exports) {
         Perlin2D: Perlin2D
     });
 
-    const VERSION = "beta-4.0.0";
+    const VERSION = "dev-1.0.0";
 
     exports.VERSION = VERSION;
     exports.array = array_lib;

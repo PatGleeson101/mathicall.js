@@ -64,9 +64,9 @@ function div(z1, z2, target = new Float64Array(2)) {
 function inverse(z, target = new Float64Array(2)) {
 	const re = z[0];
 	const im = z[1];
-	const scale = 1 / (re2 * re2 + im2 * im2);
-	target[0] = (re1 * re2 + im1 * im2) * scale;
-	target[1] = (-re1 * im2 - re2 * im1) * scale;
+	const scale = 1 / (re * re + im * im);
+	target[0] = (re * re + im * im) * scale;
+	target[1] = (- re * im - re * im) * scale;
 	return target;
 }
 
