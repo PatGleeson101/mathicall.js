@@ -332,7 +332,7 @@ function lerp(x, y, r) {
 	return x + (y - x) * r;
 }
 
-function mod(x, m) {
+function mod$1(x, m) {
 	return ((x%m)+m)%m;
 }
 
@@ -356,7 +356,7 @@ function linmap(x, domain, range) {
 
 // Freeze function exports
 Object.freeze(lerp);
-Object.freeze(mod);
+Object.freeze(mod$1);
 Object.freeze(fract);
 Object.freeze(deg);
 Object.freeze(rad);
@@ -371,12 +371,12 @@ function lerp$1(x, y, r) {
 	return lerp(x, y, r);
 }
 
-function mod$1(x, m) {
+function mod$2(x, m) {
 	setContext("mod(x, m)", arguments);
 	realNumber("x");
 	realNumber("m");
 	clearContext();
-	return mod(x, m);
+	return mod$1(x, m);
 }
 
 function fract$1(x) {
@@ -417,7 +417,7 @@ function linmap$1(x, domain, range) {
 
 // Freeze function exports
 Object.freeze(lerp$1);
-Object.freeze(mod$1);
+Object.freeze(mod$2);
 Object.freeze(fract$1);
 Object.freeze(deg$1);
 Object.freeze(rad$1);
@@ -426,7 +426,7 @@ Object.freeze(linmap$1);
 var extra_debug = /*#__PURE__*/Object.freeze({
     __proto__: null,
     lerp: lerp$1,
-    mod: mod$1,
+    mod: mod$2,
     fract: fract$1,
     deg: deg$1,
     rad: rad$1,
@@ -473,7 +473,7 @@ var standard_lib = /*#__PURE__*/Object.freeze({
     HALF_PI: HALF_PI,
     INV_PI: INV_PI,
     lerp: lerp,
-    mod: mod,
+    mod: mod$1,
     fract: fract,
     deg: deg,
     rad: rad,
@@ -727,6 +727,10 @@ var integer_lib = /*#__PURE__*/Object.freeze({
     mpow: mpow
 });
 
+function Vector(v) {
+	return new Float64Array(v);
+}
+
 //Dot product
 function dot(vec1, vec2) {
 	let result = 0;
@@ -864,37 +868,45 @@ function scale4(vec, k, target = new Float64Array(4)) {
 	return target;
 }
 
-function normalize(vec, target) { //'target' intentionally defaults to undefined
-	return scale(vec, 1 / mag(vec), target);
+function normalize(vec, target = undefined) {
+	const m = mag(vec);
+	return (m === 0) ? undefined : scale(vec, 1 / m, target);
 }
 
-function normalize2(vec, target) {
-	return scale2(vec, 1 / mag2(vec), target);
+function normalize2(vec, target = undefined) {
+	const m = mag2(vec);
+	return (m === 0) ? undefined : scale2(vec, 1 / m, target);
 }
 
-function normalize3(vec, target) {
-	return scale3(vec, 1 / mag3(vec), target);
+function normalize3(vec, target = undefined) {
+	const m = mag3(vec);
+	return (m === 0) ? undefined : scale3(vec, 1 / m, target);
 }
 
-function normalize4(vec, target) {
-	return scale4(vec, 1 / mag4(vec), target);
+function normalize4(vec, target = undefined) {
+	const m = mag4(vec);
+	return (m === 0) ? undefined : scale4(vec, 1 / m, target);
 }
 
 //Angles & rotations
 function angle(vec1, vec2) {
-	return acos(dot(vec1, vec2) / (mag(vec1) * mag(vec2)));
+	const m = mag(vec1) * mag(vec2);
+	return (m === 0) ? undefined : acos(dot(vec1, vec2) / m);
 }
 
 function angle2(vec1, vec2) {
-	return acos(dot2(vec1, vec2) / (mag2(vec1) * mag2(vec2)));
+	const m = mag2(vec1) * mag2(vec2);
+	return (m === 0) ? undefined : acos(dot2(vec1, vec2) / m);
 }
 
 function angle3(vec1, vec2) {
-	return acos(dot3(vec1, vec2) / (mag3(vec1) * mag3(vec2)));
+	const m = mag3(vec1) * mag3(vec2);
+	return (m === 0) ? undefined : acos(dot3(vec1, vec2) / m);
 }
 
 function angle4(vec1, vec2) {
-	return acos(dot4(vec1, vec2) / (mag4(vec1) * mag4(vec2)));
+	const m = mag4(vec1) * mag(vec2);
+	return (m === 0) ? undefined : acos(dot4(vec1, vec2) / m);
 }
 
 //Other component-wise operations
@@ -934,6 +946,7 @@ function toPolar2(vec, target = new Float64Array(2)) {
 }
 
 // Freeze exports
+Object.freeze(Vector);
 Object.freeze(dot);
 Object.freeze(dot2);
 Object.freeze(dot3);
@@ -1318,6 +1331,7 @@ var rect_debug = /*#__PURE__*/Object.freeze({
 var rect_lib = /*#__PURE__*/Object.freeze({
     __proto__: null,
     debug: rect_debug,
+    Vector: Vector,
     dot: dot,
     dot2: dot2,
     dot3: dot3,
@@ -1354,26 +1368,39 @@ var rect_lib = /*#__PURE__*/Object.freeze({
     toPolar2: toPolar2
 });
 
+function simplify2(vec, target = new Float64Array(2)) {
+	const r = vec[0];
+	if (r < 0) {
+		target[0] = -r;
+		target[1] = mod$1(vec[1] + PI, TWO_PI);
+	} else if (r > 0) {
+		target[0] = r;
+		target[1] = mod$1(vec[1], TWO_PI);
+	} else {
+		target[0] = 0;
+		target[1] = 0;
+	}
+	return target;
+}
+
 function dot2$2(vec1, vec2) {
 	return vec1[0] * vec2[0] * cos(vec1[1] - vec2[1]);
 }
 
 function mag$2(vec) {
-	return abs(vec[0]);
+	return vec[0];
 }
 
 function scale2$2(vec, k, target = new Float64Array(2)) {
 	target[0] = vec[0] * k;
-	target[1] = mod(vec[1], TWO_PI);
-	return target;
+	target[1] = vec[1];
+	return simplify2(target, target);
 }
 
 function normalize2$2(vec, target = new Float64Array(2)) {
-	if (vec[0] === 0) {
-		return undefined;
-	}
+	if (vec[0] === 0) {return undefined;}
 	target[0] = 1;
-	target[1] = mod(vec[1], TWO_PI);
+	target[1] = vec[1];
 	return target;
 }
 
@@ -1386,6 +1413,7 @@ function toRect2(vec, target = new Float64Array(2)) {
 }
 
 // Freeze exports
+Object.freeze(simplify2);
 Object.freeze(dot2$2);
 Object.freeze(mag$2);
 Object.freeze(scale2$2);
@@ -1394,6 +1422,7 @@ Object.freeze(toRect2);
 
 var polar_lib = /*#__PURE__*/Object.freeze({
     __proto__: null,
+    simplify2: simplify2,
     dot2: dot2$2,
     mag: mag$2,
     scale2: scale2$2,
@@ -1408,6 +1437,7 @@ var vector_lib = /*#__PURE__*/Object.freeze({
     rect: rect_lib,
     polar: polar_lib,
     debug: rect_debug,
+    Vector: Vector,
     dot: dot,
     dot2: dot2,
     dot3: dot3,
@@ -1663,7 +1693,7 @@ function union(arr1, arr2, sorted = false) {
 	}
 }
 
-function isEqual(arr1, arr2) {
+function areEqual(arr1, arr2) { //TODO: permit tolerance
 	const len1 = arr1.length;
 	const len2 = arr2.length;
 	if (len1 !== len2) {return false;}
@@ -1789,7 +1819,7 @@ Object.freeze(prod);
 Object.freeze(unique);
 Object.freeze(indexOf);
 Object.freeze(union);
-Object.freeze(isEqual);
+Object.freeze(areEqual);
 Object.freeze(sortUint8);
 Object.freeze(imin);
 Object.freeze(imax);
@@ -1914,7 +1944,6 @@ function transpose4x4(mat, target = new Float64Array(16)) {
 function mult(mat1, mat2) { //consider adding target parameter
 	const r1 = mat1.nrows;
 	const c1 = mat1.ncols;
-	const r2 = mat2.nrows;
 	const c2 = mat2.ncols;
 	const target = new Float64Array(r1 * c2);
 	target.nrows = r1;
@@ -1943,9 +1972,32 @@ function size(mat) {
 	return [mat.nrows, mat.ncols];
 }
 
+//Addition
+function add$2(mat1, mat2, target = new Float64Array(mat1.nrows * mat1.ncols)) {
+	const result = add(mat1, mat2, target);
+	result.nrows = mat1.nrows;
+	result.ncols = mat1.ncols;
+	return result;
+}
+
+//Subtraction
+function sub$2(mat1, mat2, target = new Float64Array(mat1.nrows * mat1.ncols)) {
+	const result = sub(mat1, mat2, target);
+	result.nrows = mat1.nrows;
+	result.ncols = mat1.ncols;
+	return result;
+}
+
 //Determinant
 function det2x2(mat) {
 	return mat[0] * mat[3] - mat[1] * mat[2];
+}
+
+function det3x3(mat) {
+	const {a11, a12, a13, a21, a22, a23, a31, a32, a33} = mat;
+	return a11 * (a33 * a22 - a23 * a32)
+		 + a12 * (a31 * a23 - a21 * a33)
+		 + a13 * (a32 * a21 - a22 * a31);
 }
 
 //Inverse
@@ -1992,7 +2044,6 @@ function vmult2x2(vec, mat) {
 }
 
 function multv(mat, vec) {
-	const nrows = mat.nrows;
 	const ncols = mat.ncols;
 	const len = mat.length;
 	if (vec.length !== ncols) {return undefined;}
@@ -2007,11 +2058,8 @@ function multv(mat, vec) {
 	return target;
 }
 
-function isEqual$1(mat1, mat2) {
-	if ( (mat1.nrows !== mat2.nrows) || (mat1.ncols !== mat2.ncols) ) {
-		return false;
-	}
-	return isEqual(mat1, mat2);
+function areEqual$1(mat1, mat2) {
+	return (mat1.nrows === mat2.nrows) && (mat1.ncols === mat2.ncols) && areEqual(mat1, mat2);
 }
 
 // Freeze exports
@@ -2024,13 +2072,16 @@ Object.freeze(transpose2x2);
 Object.freeze(transpose3x3);
 Object.freeze(transpose4x4);
 Object.freeze(mult);
+Object.freeze(add$2);
+Object.freeze(sub$2);
 Object.freeze(size);
 Object.freeze(det2x2);
+Object.freeze(det3x3);
 Object.freeze(inverse2x2);
 Object.freeze(vmult);
 Object.freeze(vmult2x2);
 Object.freeze(multv);
-Object.freeze(isEqual$1);
+Object.freeze(areEqual$1);
 
 function zeros$1(m, n) {
     setContext$1("zeros(m, n)", arguments);
@@ -2175,14 +2226,8 @@ var matrix_lib = /*#__PURE__*/Object.freeze({
     vmult: vmult,
     vmult2x2: vmult2x2,
     multv: multv,
-    isEqual: isEqual$1
+    areEqual: areEqual$1
 });
-
-function conj(z, target = new Float64Array(2)) {
-	target[0] = z[0];
-	target[1] = -z[1];
-	return target;
-}
 
 function real(z) {
 	return z[0];
@@ -2200,13 +2245,25 @@ function abs$1(z) {
 	return hypot(z[0], z[1]);
 }
 
-function add$2(z1, z2, target = new Float64Array(2)) {
+function conj(z, target = new Float64Array(2)) {
+	target[0] = z[0];
+	target[1] = -z[1];
+	return target;
+}
+
+function negate(z, target = new Float64Array(2)) {
+	target[0] = -z[0];
+	target[1] = -z[1];
+	return target;
+}
+
+function add$3(z1, z2, target = new Float64Array(2)) {
 	target[0] = z1[0] + z2[0];
 	target[1] = z1[1] + z2[1];
 	return target;
 }
 
-function sub$2(z1, z2, target = new Float64Array(2)) {
+function sub$3(z1, z2, target = new Float64Array(2)) {
 	target[0] = z1[0] - z2[0];
 	target[1] = z1[1] - z2[1];
 	return target;
@@ -2218,7 +2275,7 @@ function mult$2(z1, z2, target = new Float64Array(2)) {
 	const re2 = z2[0];
 	const im2 = z2[1];
 	target[0] = re1 * re2 - im1 * im2;
-	target[1] = re1 * im2 - re2 * im1;
+	target[1] = re1 * im2 + re2 * im1;
 	return target;
 }
 
@@ -2233,18 +2290,22 @@ function div(z1, z2, target = new Float64Array(2)) {
 	const im1 = z1[1];
 	const re2 = z2[0];
 	const im2 = z2[1];
-	const scale = 1 / (re2 * re2 + im2 * im2);
-	target[0] = (re1 * re2 + im1 * im2) * scale;
-	target[1] = (- re1 * im2 - re2 * im1) * scale;
+	const mag2Squared = re2 * re2 + im2 * im2;
+	if (mag2Squared === 0) {return undefined;}
+	const scaleFactor = 1 / mag2Squared;
+	target[0] = (re1 * re2 + im1 * im2) * scaleFactor;
+	target[1] = (- re1 * im2 - re2 * im1) * scaleFactor;
 	return target;
 }
 
 function inverse(z, target = new Float64Array(2)) {
 	const re = z[0];
 	const im = z[1];
-	const scale = 1 / (re * re + im * im);
-	target[0] = (re * re + im * im) * scale;
-	target[1] = (- re * im - re * im) * scale;
+	const magSquared = re * re + im * im;
+	if (magSquared === 0) {return undefined;}
+	const scaleFactor = 1 / magSquared;
+	target[0] = re * scaleFactor;
+	target[1] = -im * scaleFactor;
 	return target;
 }
 
@@ -2263,13 +2324,14 @@ Object.freeze(real);
 Object.freeze(imag);
 Object.freeze(arg);
 Object.freeze(abs$1);
-Object.freeze(add$2);
-Object.freeze(sub$2);
+Object.freeze(add$3);
+Object.freeze(sub$3);
 Object.freeze(mult$2);
 Object.freeze(scale$4);
 Object.freeze(div);
 Object.freeze(inverse);
 Object.freeze(toPolar);
+Object.freeze(negate);
 
 function conj$1(z, target$1) {
     setContext("conj(z, ?target)", arguments);
@@ -2307,22 +2369,22 @@ function abs$2(z) {
     return abs$1(z);
 }
 
-function add$3(z1, z2, target$1) {
+function add$4(z1, z2, target$1) {
 	setContext("add(z1, z2, ?target)", arguments);
 	rectComplex("z1");
     rectComplex("z2");
     target('target', 2);
     clearContext();
-    return add$2(z1, z2, target$1);
+    return add$3(z1, z2, target$1);
 }
 
-function sub$3(z1, z2, target$1) {
+function sub$4(z1, z2, target$1) {
 	setContext("sub(z1, z2, ?target)", arguments);
 	rectComplex("z1");
     rectComplex("z2");
     target('target', 2);
     clearContext();
-    return sub$2(z1, z2, target$1);
+    return sub$3(z1, z2, target$1);
 }
 
 function mult$3(z1, z2, target$1) {
@@ -2380,8 +2442,8 @@ Object.freeze(real$1);
 Object.freeze(imag$1);
 Object.freeze(arg$1);
 Object.freeze(abs$2);
-Object.freeze(add$3);
-Object.freeze(sub$3);
+Object.freeze(add$4);
+Object.freeze(sub$4);
 Object.freeze(mult$3);
 Object.freeze(scale$5);
 Object.freeze(div$1);
@@ -2395,8 +2457,8 @@ var rect_debug$1 = /*#__PURE__*/Object.freeze({
     imag: imag$1,
     arg: arg$1,
     abs: abs$2,
-    add: add$3,
-    sub: sub$3,
+    add: add$4,
+    sub: sub$4,
     mult: mult$3,
     scale: scale$5,
     div: div$1,
@@ -2412,13 +2474,14 @@ var rect_lib$1 = /*#__PURE__*/Object.freeze({
     imag: imag,
     arg: arg,
     abs: abs$1,
-    add: add$2,
-    sub: sub$2,
+    add: add$3,
+    sub: sub$3,
     mult: mult$2,
     scale: scale$4,
     div: div,
     inverse: inverse,
-    toPolar: toPolar
+    toPolar: toPolar,
+    negate: negate
 });
 
 function toArg(angle) { //Not to be exported
@@ -2429,15 +2492,8 @@ function toArg(angle) { //Not to be exported
 }
 
 function conj$2(z, target = new Float64Array(2)) {
-	const r = z[0];
-	const theta = z[1];
-	if (r < 0) {
-		target[0] = -r;
-		target[1] = -toArg(theta + PI);
-	} else {
-		target[0] = r;
-		target[1] = -toArg(theta);
-	}
+	target[0] = z[0];
+	target[1] = -z[1];
 	return target;
 }
 
@@ -2689,13 +2745,14 @@ var complex_lib = /*#__PURE__*/Object.freeze({
     imag: imag,
     arg: arg,
     abs: abs$1,
-    add: add$2,
-    sub: sub$2,
+    add: add$3,
+    sub: sub$3,
     mult: mult$2,
     scale: scale$4,
     div: div,
     inverse: inverse,
-    toPolar: toPolar
+    toPolar: toPolar,
+    negate: negate
 });
 
 function sum$1(arr) {
@@ -2762,12 +2819,12 @@ function union$1(arr1, arr2, sorted$1) {
 	return union(arr1, arr2, sorted$1);
 }
 
-function isEqual$2(arr1, arr2) {
+function areEqual$2(arr1, arr2) {
 	setContext$1("isEqual(arr1, arr2)", arguments);
 	realArray('arr1');
 	realArray('arr2');
 	clearContext();
-	return isEqual(arr1, arr2);
+	return areEqual(arr1, arr2);
 }
 
 function sortUint8$1(arr, target$1) {
@@ -2798,7 +2855,7 @@ Object.freeze(prod$1);
 Object.freeze(unique$1);
 Object.freeze(indexOf$1);
 Object.freeze(union$1);
-Object.freeze(isEqual$2);
+Object.freeze(areEqual$2);
 Object.freeze(sortUint8$1);
 Object.freeze(count$1);
 
@@ -2809,7 +2866,8 @@ var array_debug = /*#__PURE__*/Object.freeze({
     max: max$2,
     prod: prod$1,
     unique: unique$1,
-    indexOf: indexOf$1
+    indexOf: indexOf$1,
+    areEqual: areEqual$2
 });
 
 var array_lib = /*#__PURE__*/Object.freeze({
@@ -2822,7 +2880,7 @@ var array_lib = /*#__PURE__*/Object.freeze({
     unique: unique,
     indexOf: indexOf,
     union: union,
-    isEqual: isEqual,
+    areEqual: areEqual,
     sortUint8: sortUint8,
     imin: imin,
     imax: imax,
@@ -2832,6 +2890,327 @@ var array_lib = /*#__PURE__*/Object.freeze({
 var statistics_debug = /*#__PURE__*/Object.freeze({
     __proto__: null
 });
+
+//Constants
+// Ratio-of-uniforms
+const RU_SCALE_CONSTANT = sqrt(2 / E);
+// Park-Miller
+const MCG_A = 48271;
+const MCG_M = 2147483647;
+const MCG_M_PLUS_1 = MCG_M + 1;
+const MAX_MCG_SKIP = 700; //Yet to be optimised
+
+//Unseeded random number generation
+// Continuous uniform distribution
+function unif(a = 0, b = 1, count = undefined) { //a>b or b>a
+	if (count === undefined) { //Return single value
+		return a + (b - a) * random();
+	} else { //Return array of values
+		const result = new Float64Array(count);
+		for (let i = 0; i < count; i++) {
+			result[i] = a + (b - a) * random();
+		}
+		return result;
+	}
+}
+
+// Uniform integer distribution
+function int(a, b, count = undefined) { //assumes b > a
+	const A = ceil(a);
+	const B = floor(b) + 1;
+	const r = B - A;
+	if (count === undefined) { //Return single value
+		return floor(A + random() * r);
+	} else { //Return array of values
+		const result = new Float64Array(count);
+		for (let i = 0; i < count; i++) {
+			result[i] = floor(A + r * random());
+		}
+		return result;
+	}
+}
+
+// Normal distribution
+function norm(mean = 0, sd = 1, count = undefined) { //Ratio-of-uniforms algorithm
+	if (count === undefined) { //Return single value
+		while (true) {
+			const u1 = random();
+			const v2 = random();
+			const u2 = (2 * v2 - 1) * RU_SCALE_CONSTANT;
+			const x = u2 / u1;
+			if ( (u1 * u1) <= exp(-0.5 * x * x)) {
+				return mean + x * sd;
+			}
+		}
+	} else { //Return array of values
+		const result = new Float64Array(count);
+		let i = 0;
+		while (i < count) {
+			const u1 = random();
+			const v2 = random();
+			const u2 = (2 * v2 - 1) * RU_SCALE_CONSTANT;
+			const x = u2 / u1;
+			if ( (u1 * u1) <= exp(-0.5 * x * x)) {
+				result[i++] = mean + x * sd;
+			}
+		}
+		return result;
+	}
+}
+
+// Exponential distribution
+function exp$1(lambda = 1, count = undefined) {
+	if (count === undefined) { //Return single value
+		return -ln(random()) / lambda;
+	} else { //Return array of values
+		const result = new Float64Array(count);
+		for (let i = 0; i < count; i++) {
+			result[i] = -ln(random()) / lambda;
+		}
+		return result;
+	}
+}
+
+//Seeded random number generators
+
+// (Uniform) Multiplicative congruential generator
+function MCG(a = 0, b = 1, seed = int(1, 4294967295)) {
+	let scaleFactor, state, i; //Declare variables
+	const _seed = function(s = undefined) {
+		if (s !== undefined) { //Set new seed and reset state
+			seed = floor(abs(s)); //TODO: use hash instead of just floor(abs())
+			state = seed;
+			i = 0;
+		}
+		return seed; //Return current seed (whether updated or not)
+	};
+	const _range = function(r = a, s = b) {
+		//Set new range
+		a = r;
+		b = s;
+		scaleFactor = (b - a) / MCG_M_PLUS_1;
+		return [a, b];
+	};
+	//Initialise variables
+	_seed(seed);
+	_range(a, b);
+
+	const generator = function(count = undefined) {
+		if (count === undefined) { //Return single value
+			state = (state * MCG_A) % MCG_M;
+			return a + state * scaleFactor;
+		} else { //Return array of values
+			const result = new Float64Array(count);
+			for (let i = 0; i < count; i++) {
+				state = (state * MCG_A) % MCG_M;
+				result[i] = a + state * scaleFactor;
+			}
+			return result;
+		}
+	};
+
+	//Function
+	const goto = function(index) {
+		//Starting state
+		index = mod(index, MCG_M + 1);
+		if (index < i) {
+			i = 0;
+			state = seed;
+		}
+		//Skip to desired index
+		let skip = index - i;
+		if (skip < MAX_MCG_SKIP) { //Faster to iterate (small skip)
+			for (let j = 0; j < skip; j++) {
+				state = mod(state * MCG_A, MCG_M);
+			}
+		} else { //Faster to use fast modular exponentiation (large skip)
+			let aiMod = 1;
+			while (skip > 0) {
+				if (skip%2 === 1) {
+					aiMod = (aiMod*MCG_A) % MCG_M;
+				} //Otherwise, result remains constant
+				skip = skip >> 1;
+				aiMod = (aiMod**2) % MCG_M;
+			}
+			state = (aiMod * state) % MCG_M;
+		}
+		//Update index
+		i = index;
+		//Return state mapped to (0,1)
+		return state / (MCG_M + 1);
+	};
+
+	generator.seed = Object.freeze(_seed);
+	generator.range = Object.freeze(_range);
+	generator.goto = Object.freeze(goto); //Experimental
+	return Object.freeze(generator);
+}
+
+
+//Xorshift
+function Xorshift32(a = 0, b = 1, seed = int(1, 4294967295)) {
+	const state = new Uint32Array(1);
+	let scaleFactor;
+	const _seed = function(s = undefined) {
+		if (s !== undefined) { //Set new seed and reset state
+			seed = trunc(s) || 1; //TODO: use hash, not just trunc(s)
+			state[0] = seed;
+		}
+		return seed; //Return current seed (whether updated or not)
+	};
+	const _range = function(r = a, s = b) {
+		//Set new range
+		a = r;
+		b = s;
+		scaleFactor = (b - a) / 4294967296;
+		return [a, b];
+	};
+
+	_seed(seed);
+	_range(a, b);
+
+	const generator = function(count = undefined) {
+		if (count === undefined) { //Return single value
+			state[0] ^= state[0] << 13;
+			state[0] ^= state[0] << 17;
+			state[0] ^= state[0] << 5;
+			return state[0] * scaleFactor;
+		} else { //Return array of values
+			const result = new Float64Array(count);
+			for (let i = 0; i < count; i++) {
+				state[0] ^= state[0] << 13;
+				state[0] ^= state[0] << 17;
+				state[0] ^= state[0] << 5;
+				result[i] = state[0] * scaleFactor;
+			}
+			return result;
+		}
+	};
+
+	generator.seed = Object.freeze(_seed);
+	generator.range = Object.freeze(_range);
+	return Object.freeze(generator);
+}
+
+function RU(mean = 0, sd = 1, seed = int(1, 4294967295)) { //Ratio of uniforms
+	const urand = Xorshift32(0, 1, seed); //TODO: hash seed
+	
+	const generator = function(count = undefined) {
+		if (count === undefined) { //Return single value
+			while (true) {
+				const u1 = urand();
+				const v2 = urand();
+				const u2 = (2 * v2 - 1) * RU_SCALE_CONSTANT;
+				const x = u2 / u1;
+				if ( (u1 * u1) <= exp(-0.5 * x * x)) {
+					return mean + x * sd;
+				}
+			}
+		} else { //Return array of values
+			const result = new Float64Array(count);
+			let i = 0;
+			while (i < count) {
+				const u1 = urand();
+				const v2 = urand();
+				const u2 = (2 * v2 - 1) * RU_SCALE_CONSTANT;
+				const x = u2 / u1;
+				if ( (u1 * u1) <= exp(-0.5 * x * x)) {
+					result[i++] = mean + x * sd;
+				}
+			}
+			return result;
+		}
+	};
+
+	const _mean = function(u = mean) {
+		mean = u;
+		return mean;
+	};
+
+	const _sd = function(s = sd) {
+		sd = s;
+		return sd;
+	};
+
+	generator.seed = urand.seed; //TODO: hash seed
+	generator.mean = Object.freeze(_mean);
+	generator.sd = Object.freeze(_sd);
+
+	return Object.freeze(generator);
+}
+
+const Unif = Xorshift32;
+const Norm = RU;
+
+const Int = function(a, b, seed = int(1, 4294967295)) {
+	const urand = Xorshift32(ceil(a), floor(b) + 1, seed); //TODO: hash seed
+
+	const generator = function(count = undefined) {
+		if (count === undefined) { //Return single value
+			return floor(urand());
+		} else { //Return array of values
+			const result = urand(count);
+			for (let i = 0; i < count; i++) {
+				result[i] = floor(result[i]);
+			}
+			return result;
+		}
+	};
+
+	const _range = function(r = a, s = b) {
+		a = r;
+		b = s;
+		urand.range(ceil(a), floor(b) + 1);
+		return [a, b];
+	};
+
+	generator.seed = urand.seed; //TODO: hash seed
+	generator.range = Object.freeze(_range);
+
+	return Object.freeze(generator);
+};
+
+// Exponential
+function Exp(lambda = 1, seed = int(1, 4294967295)) {
+	const urand = Xorshift32(0, 1, seed); //TODO: hash seed
+
+	const generator = function(count = undefined) {
+		if (count === undefined) { //Return single value
+			return -ln(urand()) / lambda;
+		} else { //Return array of values
+			const result = new Float64Array(count);
+			for (let i = 0; i < count; i++) {
+				result[i] = -ln(urand()) / lambda;
+			}
+			return result;
+		}
+	};
+
+	const _lambda = function(l = lambda) {
+		lambda = l;
+		return lambda;
+	};
+
+	generator.seed = urand.seed;
+	generator.lambda = Object.freeze(_lambda);
+
+	return Object.freeze(generator);
+}
+
+// Freeze exports
+Object.freeze(unif);
+Object.freeze(int);
+Object.freeze(norm);
+Object.freeze(exp$1);
+
+Object.freeze(MCG);
+Object.freeze(Xorshift32);
+Object.freeze(RU);
+
+Object.freeze(Unif);
+Object.freeze(Int);
+Object.freeze(Norm);
+Object.freeze(Exp);
 
 function sum$2(arr, freq = undefined) {
 	const count = arr.length;
@@ -3049,314 +3428,27 @@ function frac(num, tolerance = num * EPSILON * 10) { //Farey rational approximat
 }
 
 const epsilon = Math.cbrt(EPSILON);
-function deriv(f, x) {
+function derivative(f, x) {
 	const x0 = x * (1 + epsilon);
 	const x1 = x * (1 - epsilon);
 	const dx = x1 - x0;
-	console.log(dx);
 	return (f(x1) - f(x0)) / dx;
 }
 
 //Freeze exports
 Object.freeze(frac);
-Object.freeze(deriv);
+Object.freeze(derivative);
 
 var numerical_lib = /*#__PURE__*/Object.freeze({
     __proto__: null,
     frac: frac,
-    deriv: deriv
+    derivative: derivative
 });
-
-//Constants
-// Ratio-of-uniforms
-const RU_SCALE_CONSTANT = sqrt(2 / E);
-// Park-Miller
-const MCG_A = 48271;
-const MCG_M = 2147483647;
-const MCG_M_PLUS_1 = MCG_M + 1;
-
-//Unseeded random number generation
-// Continuous uniform distribution
-function unif(a = 0, b = 1, count = undefined) { //a>b or b>a
-	if (count === undefined) { //Return single value
-		return a + (b - a) * random();
-	} else { //Return array of values
-		const result = new Float64Array(count);
-		for (let i = 0; i < count; i++) {
-			result[i] = a + (b - a) * random();
-		}
-		return result;
-	}
-}
-
-// Uniform integer distribution
-function int(a, b, count = undefined) { //assumes b > a
-	const A = ceil(a);
-	const B = floor(b) + 1;
-	const r = B - A;
-	if (count === undefined) { //Return single value
-		return floor(A + random() * r);
-	} else { //Return array of values
-		const result = new Float64Array(count);
-		for (let i = 0; i < count; i++) {
-			result[i] = floor(A + r * random());
-		}
-		return result;
-	}
-}
-
-// Normal distribution
-function norm(mean = 0, sd = 1, count = undefined) { //Ratio-of-uniforms algorithm
-	if (count === undefined) { //Return single value
-		while (true) {
-			const u1 = random();
-			const v2 = random();
-			const u2 = (2 * v2 - 1) * RU_SCALE_CONSTANT;
-			const x = u2 / u1;
-			if ( (u1 * u1) <= exp(-0.5 * x * x)) {
-				return mean + x * sd;
-			}
-		}
-	} else { //Return array of values
-		const result = new Float64Array(count);
-		let i = 0;
-		while (i < count) {
-			const u1 = random();
-			const v2 = random();
-			const u2 = (2 * v2 - 1) * RU_SCALE_CONSTANT;
-			const x = u2 / u1;
-			if ( (u1 * u1) <= exp(-0.5 * x * x)) {
-				result[i++] = mean + x * sd;
-			}
-		}
-		return result;
-	}
-}
-
-// Exponential distribution
-function exp$1(lambda = 1, count = undefined) {
-	if (count === undefined) { //Return single value
-		return -ln(random()) / lambda;
-	} else { //Return array of values
-		const result = new Float64Array(count);
-		for (let i = 0; i < count; i++) {
-			result[i] = -ln(random()) / lambda;
-		}
-		return result;
-	}
-}
-
-//Seeded random number generators
-
-// (Uniform) Multiplicative congruential generator
-function MCG(a = 0, b = 1, seed = int(1, 4294967295)) {
-	let scaleFactor, state; //Declare variables
-	const _seed = function(s = undefined) {
-		if (s !== undefined) { //Set new seed and reset state
-			seed = floor(abs(s)); //TODO: use hash instead of just floor(abs())
-			state = seed;
-		}
-		return seed; //Return current seed (whether updated or not)
-	};
-	const _range = function(r = a, s = b) {
-		//Set new range
-		a = r;
-		b = s;
-		scaleFactor = (b - a) / MCG_M_PLUS_1;
-		return [a, b];
-	};
-	//Initialise variables
-	_seed(seed);
-	_range(a, b);
-
-	const generator = function(count = undefined) {
-		if (count === undefined) { //Return single value
-			state = (state * MCG_A) % MCG_M;
-			return a + state * scaleFactor;
-		} else { //Return array of values
-			const result = new Float64Array(count);
-			for (let i = 0; i < count; i++) {
-				state = (state * MCG_A) % MCG_M;
-				result[i] = a + state * scaleFactor;
-			}
-			return result;
-		}
-	};
-
-	generator.seed = Object.freeze(_seed);
-	generator.range = Object.freeze(_range);
-	return Object.freeze(generator);
-}
-
-//Xorshift
-function Xorshift32(a = 0, b = 1, seed = int(1, 4294967295)) {
-	const state = new Uint32Array(1);
-	let scaleFactor;
-	const _seed = function(s = undefined) {
-		if (s !== undefined) { //Set new seed and reset state
-			seed = trunc(s) || 1; //TODO: use hash, not just trunc(s)
-			state[0] = seed;
-		}
-		return seed; //Return current seed (whether updated or not)
-	};
-	const _range = function(r = a, s = b) {
-		//Set new range
-		a = r;
-		b = s;
-		scaleFactor = (b - a) / 4294967296;
-		return [a, b];
-	};
-
-	_seed(seed);
-	_range(a, b);
-
-	const generator = function(count = undefined) {
-		if (count === undefined) { //Return single value
-			state[0] ^= state[0] << 13;
-			state[0] ^= state[0] << 17;
-			state[0] ^= state[0] << 5;
-			return state[0] * scaleFactor;
-		} else { //Return array of values
-			const result = new Float64Array(count);
-			for (let i = 0; i < count; i++) {
-				state[0] ^= state[0] << 13;
-				state[0] ^= state[0] << 17;
-				state[0] ^= state[0] << 5;
-				result[i] = state[0] * scaleFactor;
-			}
-			return result;
-		}
-	};
-
-	generator.seed = Object.freeze(_seed);
-	generator.range = Object.freeze(_range);
-	return Object.freeze(generator);
-}
-
-function RU(mean = 0, sd = 1, seed = int(1, 4294967295)) { //Ratio of uniforms
-	const urand = Xorshift32(0, 1, seed); //TODO: hash seed
-	
-	const generator = function(count = undefined) {
-		if (count === undefined) { //Return single value
-			while (true) {
-				const u1 = urand();
-				const v2 = urand();
-				const u2 = (2 * v2 - 1) * RU_SCALE_CONSTANT;
-				const x = u2 / u1;
-				if ( (u1 * u1) <= exp(-0.5 * x * x)) {
-					return mean + x * sd;
-				}
-			}
-		} else { //Return array of values
-			const result = new Float64Array(count);
-			let i = 0;
-			while (i < count) {
-				const u1 = urand();
-				const v2 = urand();
-				const u2 = (2 * v2 - 1) * RU_SCALE_CONSTANT;
-				const x = u2 / u1;
-				if ( (u1 * u1) <= exp(-0.5 * x * x)) {
-					result[i++] = mean + x * sd;
-				}
-			}
-			return result;
-		}
-	};
-
-	const _mean = function(u = mean) {
-		mean = u;
-		return mean;
-	};
-
-	const _sd = function(s = sd) {
-		sd = s;
-		return sd;
-	};
-
-	generator.seed = urand.seed; //TODO: hash seed
-	generator.mean = Object.freeze(_mean);
-	generator.sd = Object.freeze(_sd);
-
-	return Object.freeze(generator);
-}
-
-const Unif = Xorshift32;
-const Norm = RU;
-
-const Int = function(a, b, seed = int(1, 4294967295)) {
-	const urand = Xorshift32(ceil(a), floor(b) + 1, seed); //TODO: hash seed
-
-	const generator = function(count = undefined) {
-		if (count === undefined) { //Return single value
-			return floor(urand());
-		} else { //Return array of values
-			const result = urand(count);
-			for (let i = 0; i < count; i++) {
-				result[i] = floor(result[i]);
-			}
-			return result;
-		}
-	};
-
-	const _range = function(r = a, s = b) {
-		a = r;
-		b = s;
-		urand.range(ceil(a), floor(b) + 1);
-		return [a, b];
-	};
-
-	generator.seed = urand.seed; //TODO: hash seed
-	generator.range = Object.freeze(_range);
-
-	return Object.freeze(generator);
-};
-
-// Exponential
-function Exp(lambda = 1, seed = int(1, 4294967295)) {
-	const urand = Xorshift32(0, 1, seed); //TODO: hash seed
-
-	const generator = function(count = undefined) {
-		if (count === undefined) { //Return single value
-			return -ln(urand()) / lambda;
-		} else { //Return array of values
-			const result = new Float64Array(count);
-			for (let i = 0; i < count; i++) {
-				result[i] = -ln(urand()) / lambda;
-			}
-			return result;
-		}
-	};
-
-	const _lambda = function(l = lambda) {
-		lambda = l;
-		return lambda;
-	};
-
-	generator.seed = urand.seed;
-	generator.lambda = Object.freeze(_lambda);
-
-	return Object.freeze(generator);
-}
-
-// Freeze exports
-Object.freeze(unif);
-Object.freeze(int);
-Object.freeze(norm);
-Object.freeze(exp$1);
-
-Object.freeze(MCG);
-Object.freeze(Xorshift32);
-Object.freeze(RU);
-
-Object.freeze(Unif);
-Object.freeze(Int);
-Object.freeze(Norm);
-Object.freeze(Exp);
 
 //Uniform mapping
 function Float1to1(seed = int(1, MAX_SAFE_INTEGER)) { //Scalar -> scalar
 	//Seed checking
-	seed = mod(seed * 10.23, 4096000);
+	seed = mod$1(seed * 10.23, 4096000);
 	//Function
 	const rng = function(x) {
 		x = fract(x * 0.1031);
@@ -3372,7 +3464,7 @@ function Float1to1(seed = int(1, MAX_SAFE_INTEGER)) { //Scalar -> scalar
 
 function Float2to1(seed = int(1, MAX_SAFE_INTEGER)) { //2D vector -> scalar
 	//Seed checking
-	seed = mod(seed * 10.23, MAX_SAFE_INTEGER);
+	seed = mod$1(seed * 10.23, MAX_SAFE_INTEGER);
 	//Function
 	const rng = function(vec) {
 		const pX = fract(vec[0] * 0.1031);

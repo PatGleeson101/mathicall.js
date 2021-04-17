@@ -7,16 +7,23 @@ function toArg(angle) { //Not to be exported
 	return angle;
 }
 
-function conj(z, target = new Float64Array(2)) {
+function principal(z, target = new Float64Array(2)) {
 	const r = z[0];
-	const theta = z[1];
 	if (r < 0) {
 		target[0] = -r;
-		target[1] = -toArg(theta + PI);
-	} else {
+		target[1] = toArg(-z[1]);
+	} else if (r > 0) {
 		target[0] = r;
-		target[1] = -toArg(theta);
+		target[1] = toArg(z[1]);
+	} else {
+		target[0] = 0;
+		target[1] = 0;
 	}
+}
+
+function conj(z, target = new Float64Array(2)) {
+	target[0] = z[0];
+	target[1] = -z[1];
 	return target;
 }
 
@@ -34,6 +41,11 @@ function arg(z) {
 
 function abs(z) {
 	return stdAbs(z[0]);
+}
+
+function negate(z, target = new Float64Array(2)) {
+	target[0] = z[0];
+	target[1] = toArg(z[1] - PI);
 }
 
 function scale(z, k, target = new Float64Array(2)) {

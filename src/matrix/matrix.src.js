@@ -1,4 +1,5 @@
-import {isEqual as isArrayEqual} from "../array/array.src.js";
+import {areEqual as arrAreEqual} from "../array/array.src.js";
+import {add as vecAdd, sub as vecSub} from "../vector/rect/rect.src.js";
 
 function zeros(nrows, ncols) {
 	const result = new Float64Array(nrows * ncols);
@@ -119,7 +120,6 @@ function transpose4x4(mat, target = new Float64Array(16)) {
 function mult(mat1, mat2) { //consider adding target parameter
 	const r1 = mat1.nrows;
 	const c1 = mat1.ncols;
-	const r2 = mat2.nrows;
 	const c2 = mat2.ncols;
 	const target = new Float64Array(r1 * c2);
 	target.nrows = r1;
@@ -148,9 +148,32 @@ function size(mat) {
 	return [mat.nrows, mat.ncols];
 }
 
+//Addition
+function add(mat1, mat2, target = new Float64Array(mat1.nrows * mat1.ncols)) {
+	const result = vecAdd(mat1, mat2, target);
+	result.nrows = mat1.nrows;
+	result.ncols = mat1.ncols;
+	return result;
+}
+
+//Subtraction
+function sub(mat1, mat2, target = new Float64Array(mat1.nrows * mat1.ncols)) {
+	const result = vecSub(mat1, mat2, target);
+	result.nrows = mat1.nrows;
+	result.ncols = mat1.ncols;
+	return result;
+}
+
 //Determinant
 function det2x2(mat) {
 	return mat[0] * mat[3] - mat[1] * mat[2];
+}
+
+function det3x3(mat) {
+	const {a11, a12, a13, a21, a22, a23, a31, a32, a33} = mat;
+	return a11 * (a33 * a22 - a23 * a32)
+		 + a12 * (a31 * a23 - a21 * a33)
+		 + a13 * (a32 * a21 - a22 * a31);
 }
 
 //Inverse
@@ -197,7 +220,6 @@ function vmult2x2(vec, mat) {
 }
 
 function multv(mat, vec) {
-	const nrows = mat.nrows;
 	const ncols = mat.ncols;
 	const len = mat.length;
 	if (vec.length !== ncols) {return undefined;}
@@ -212,11 +234,8 @@ function multv(mat, vec) {
 	return target;
 }
 
-function isEqual(mat1, mat2) {
-	if ( (mat1.nrows !== mat2.nrows) || (mat1.ncols !== mat2.ncols) ) {
-		return false;
-	}
-	return isArrayEqual(mat1, mat2);
+function areEqual(mat1, mat2) {
+	return (mat1.nrows === mat2.nrows) && (mat1.ncols === mat2.ncols) && arrAreEqual(mat1, mat2);
 }
 
 // Freeze exports
@@ -229,14 +248,17 @@ Object.freeze(transpose2x2);
 Object.freeze(transpose3x3);
 Object.freeze(transpose4x4);
 Object.freeze(mult);
+Object.freeze(add);
+Object.freeze(sub);
 Object.freeze(size);
 Object.freeze(det2x2);
+Object.freeze(det3x3);
 Object.freeze(inverse2x2);
 Object.freeze(vmult);
 Object.freeze(vmult2x2);
 Object.freeze(multv);
-Object.freeze(isEqual);
+Object.freeze(areEqual);
 
 // Export
 export {zeros, constant, identity, flatten, scale, transpose2x2, transpose3x3, transpose4x4, mult, size, det2x2, inverse2x2}
-export {vmult, vmult2x2, multv, isEqual}
+export {vmult, vmult2x2, multv, areEqual}

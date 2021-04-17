@@ -65,12 +65,12 @@ function union(arr1, arr2, sorted) {
 	return src.union(arr1, arr2, sorted);
 }
 
-function isEqual(arr1, arr2) {
+function areEqual(arr1, arr2) {
 	setContext("isEqual(arr1, arr2)", arguments);
 	assert.realArray('arr1');
 	assert.realArray('arr2');
 	clearContext();
-	return src.isEqual(arr1, arr2);
+	return src.areEqual(arr1, arr2);
 }
 
 function sortUint8(arr, target) {
@@ -101,9 +101,9 @@ Object.freeze(prod);
 Object.freeze(unique);
 Object.freeze(indexOf);
 Object.freeze(union);
-Object.freeze(isEqual);
+Object.freeze(areEqual);
 Object.freeze(sortUint8);
 Object.freeze(count);
 
 // Export exports
-export {sum, min, max, prod, unique, indexOf}
+export {sum, min, max, prod, unique, indexOf, areEqual}

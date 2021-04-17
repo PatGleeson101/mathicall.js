@@ -63,6 +63,7 @@ vector.rect.dot([1, 2], [0.5, 3]); //6.5
 - Vectors
 - Matrices
 - Random numbers
+- Perlin noise
 - Complex numbers
 - Array operations
 - Statistics

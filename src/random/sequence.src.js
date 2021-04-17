@@ -7,6 +7,7 @@ const RU_SCALE_CONSTANT = sqrt(2 / E);
 const MCG_A = 48271;
 const MCG_M = 2147483647;
 const MCG_M_PLUS_1 = MCG_M + 1;
+const MAX_MCG_SKIP = 700; //Yet to be optimised
 
 //Unseeded random number generation
 // Continuous uniform distribution
@@ -83,11 +84,12 @@ function exp(lambda = 1, count = undefined) {
 
 // (Uniform) Multiplicative congruential generator
 function MCG(a = 0, b = 1, seed = int(1, 4294967295)) {
-	let scaleFactor, state; //Declare variables
+	let scaleFactor, state, i; //Declare variables
 	const _seed = function(s = undefined) {
 		if (s !== undefined) { //Set new seed and reset state
 			seed = floor(abs(s)); //TODO: use hash instead of just floor(abs())
 			state = seed;
+			i = 0;
 		}
 		return seed; //Return current seed (whether updated or not)
 	}
@@ -116,10 +118,43 @@ function MCG(a = 0, b = 1, seed = int(1, 4294967295)) {
 		}
 	}
 
+	//Function
+	const goto = function(index) {
+		//Starting state
+		index = mod(index, MCG_M + 1);
+		if (index < i) {
+			i = 0;
+			state = seed;
+		}
+		//Skip to desired index
+		let skip = index - i;
+		if (skip < MAX_MCG_SKIP) { //Faster to iterate (small skip)
+			for (let j = 0; j < skip; j++) {
+				state = mod(state * MCG_A, MCG_M);
+			}
+		} else { //Faster to use fast modular exponentiation (large skip)
+			let aiMod = 1;
+			while (skip > 0) {
+				if (skip%2 === 1) {
+					aiMod = (aiMod*MCG_A) % MCG_M
+				} //Otherwise, result remains constant
+				skip = skip >> 1;
+				aiMod = (aiMod**2) % MCG_M;
+			}
+			state = (aiMod * state) % MCG_M;
+		}
+		//Update index
+		i = index;
+		//Return state mapped to (0,1)
+		return state / (MCG_M + 1);
+	}
+
 	generator.seed = Object.freeze(_seed);
 	generator.range = Object.freeze(_range);
+	generator.goto = Object.freeze(goto); //Experimental
 	return Object.freeze(generator);
 }
+
 
 //Xorshift
 function Xorshift32(a = 0, b = 1, seed = int(1, 4294967295)) {

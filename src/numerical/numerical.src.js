@@ -1,4 +1,4 @@
-import {abs, floor, EPSILON} from "../standard/standard.lib.js";
+import {abs, floor, EPSILON} from "../standard/inbuilt.src.js";
 
 function frac(num, tolerance = num * EPSILON * 10) { //Farey rational approximation algorithm
 	const wholePart = floor(num);
@@ -31,16 +31,15 @@ function frac(num, tolerance = num * EPSILON * 10) { //Farey rational approximat
 }
 
 const epsilon = Math.cbrt(EPSILON);
-function deriv(f, x) {
+function derivative(f, x) {
 	const x0 = x * (1 + epsilon);
 	const x1 = x * (1 - epsilon);
 	const dx = x1 - x0;
-	console.log(dx);
 	return (f(x1) - f(x0)) / dx;
 }
 
 //Freeze exports
 Object.freeze(frac);
-Object.freeze(deriv);
+Object.freeze(derivative);
 
-export {frac, deriv}
+export {frac, derivative}

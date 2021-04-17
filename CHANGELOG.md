@@ -1,6 +1,9 @@
 # Changelog
 
 #### Dev 1.0.0
+- Several minor functions added
+- Polar complex numbers and polar vectors now require positive magnitudes
+- Better handling of edge cases
 - Rename `smult` to `scale` in `complex`, `matrix` and `vector` sublibraries.
 - Make rectangular form directly accessible through `vector` and `complex` by default. These functions can still be accessed through `vector.rect` and `complex.rect` as well.
 - Switch to Jest for unit testing

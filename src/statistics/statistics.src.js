@@ -1,5 +1,6 @@
-import { sqrt, exp, ln } from "../standard/standard.lib.js";
-import { count } from "../array/array.lib.js";
+import { sqrt, exp, ln, floor } from "../standard/inbuilt.src.js";
+import { count } from "../array/array.src.js";
+import { unif as randUnif } from "../random/sequence.src.js";
 
 function sum(arr, freq = undefined) {
 	const count = arr.length;
@@ -137,6 +138,10 @@ function unifCdf(x, a, b) {
 
 function unifInvCdf(p, a, b) {
 	return a + p * (a - b);
+}
+
+function unifSample(a, b, n) {
+	return randUnif(n);
 }
 
 function expPdf(x, lambda) {

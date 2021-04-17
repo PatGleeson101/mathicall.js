@@ -1,4 +1,4 @@
-import {floor, min as stdMin, max as stdMax} from "../standard/standard.lib.js";
+import {random, floor, min as stdMin, max as stdMax} from "../standard/inbuilt.src.js";
 
 const MAX_LINEAR_SEARCH_LENGTH = 64; //Yet to be optimised
 
@@ -219,7 +219,7 @@ function union(arr1, arr2, sorted = false) {
 	}
 }
 
-function isEqual(arr1, arr2) {
+function areEqual(arr1, arr2) { //TODO: permit tolerance
 	const len1 = arr1.length;
 	const len2 = arr2.length;
 	if (len1 !== len2) {return false;}
@@ -347,11 +347,12 @@ Object.freeze(prod);
 Object.freeze(unique);
 Object.freeze(indexOf);
 Object.freeze(union);
-Object.freeze(isEqual);
+Object.freeze(areEqual);
 Object.freeze(sortUint8);
 Object.freeze(imin);
 Object.freeze(imax);
 Object.freeze(count);
 
 // Export exports
-export {sum, min, max, prod, unique, indexOf, union, isEqual, sortUint8, imin, imax, count}
+export {sum, min, max, prod, unique, indexOf}
+export {union, areEqual, sortUint8, imin, imax, count}

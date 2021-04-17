@@ -5,7 +5,7 @@ test("deriv", () => {
         return (x + 1) * (x + 1)
     }
 
-    expect(numerical.deriv(xPlus1Squared, 2.5)).toBeCloseTo(7);
+    expect(numerical.derivative(xPlus1Squared, 2.5)).toBeCloseTo(7);
 });
 
 test("frac", () => {

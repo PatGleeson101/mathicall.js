@@ -1,4 +1,8 @@
-import {sqrt, acos, hypot, abs, atan2, PI, TWO_PI, fract as sfract, mod} from "../../standard/standard.lib.js";
+import {acos, hypot, atan2, PI, fract as stdFract} from "../../standard/standard.lib.js";
+
+function Vector(v) {
+	return new Float64Array(v);
+}
 
 //Dot product
 function dot(vec1, vec2) {
@@ -137,66 +141,74 @@ function scale4(vec, k, target = new Float64Array(4)) {
 	return target;
 }
 
-function normalize(vec, target) { //'target' intentionally defaults to undefined
-	return scale(vec, 1 / mag(vec), target);
+function normalize(vec, target = undefined) {
+	const m = mag(vec);
+	return (m === 0) ? undefined : scale(vec, 1 / m, target);
 }
 
-function normalize2(vec, target) {
-	return scale2(vec, 1 / mag2(vec), target);
+function normalize2(vec, target = undefined) {
+	const m = mag2(vec);
+	return (m === 0) ? undefined : scale2(vec, 1 / m, target);
 }
 
-function normalize3(vec, target) {
-	return scale3(vec, 1 / mag3(vec), target);
+function normalize3(vec, target = undefined) {
+	const m = mag3(vec);
+	return (m === 0) ? undefined : scale3(vec, 1 / m, target);
 }
 
-function normalize4(vec, target) {
-	return scale4(vec, 1 / mag4(vec), target);
+function normalize4(vec, target = undefined) {
+	const m = mag4(vec);
+	return (m === 0) ? undefined : scale4(vec, 1 / m, target);
 }
 
 //Angles & rotations
 function angle(vec1, vec2) {
-	return acos(dot(vec1, vec2) / (mag(vec1) * mag(vec2)));
+	const m = mag(vec1) * mag(vec2);
+	return (m === 0) ? undefined : acos(dot(vec1, vec2) / m);
 }
 
 function angle2(vec1, vec2) {
-	return acos(dot2(vec1, vec2) / (mag2(vec1) * mag2(vec2)));
+	const m = mag2(vec1) * mag2(vec2);
+	return (m === 0) ? undefined : acos(dot2(vec1, vec2) / m);
 }
 
 function angle3(vec1, vec2) {
-	return acos(dot3(vec1, vec2) / (mag3(vec1) * mag3(vec2)));
+	const m = mag3(vec1) * mag3(vec2);
+	return (m === 0) ? undefined : acos(dot3(vec1, vec2) / m);
 }
 
 function angle4(vec1, vec2) {
-	return acos(dot4(vec1, vec2) / (mag4(vec1) * mag4(vec2)));
+	const m = mag4(vec1) * mag(vec2);
+	return (m === 0) ? undefined : acos(dot4(vec1, vec2) / m);
 }
 
 //Other component-wise operations
 function fract(vec, target = new Float64Array(vec.length)) {
 	const dimension = vec.length;
 	for (let i = 0; i < dimension; i++) {
-		target[i] = sfract(vec[i]);
+		target[i] = stdFract(vec[i]);
 	}
 	return target;
 }
 
 function fract2(vec, target = new Float64Array(2)) {
-	target[0] = sfract(vec[0]);
-	target[1] = sfract(vec[1]);
+	target[0] = stdFract(vec[0]);
+	target[1] = stdFract(vec[1]);
 	return target;
 }
 
 function fract3(vec, target = new Float64Array(3)) {
-	target[0] = sfract(vec[0]);
-	target[1] = sfract(vec[1]);
-	target[2] = sfract(vec[2]);
+	target[0] = stdFract(vec[0]);
+	target[1] = stdFract(vec[1]);
+	target[2] = stdFract(vec[2]);
 	return target;
 }
 
 function fract4(vec, target = new Float64Array(4)) {
-	target[0] = sfract(vec[0]);
-	target[1] = sfract(vec[1]);
-	target[2] = sfract(vec[2]);
-	target[3] = sfract(vec[3]);
+	target[0] = stdFract(vec[0]);
+	target[1] = stdFract(vec[1]);
+	target[2] = stdFract(vec[2]);
+	target[3] = stdFract(vec[3]);
 	return target;
 }
 
@@ -207,6 +219,7 @@ function toPolar2(vec, target = new Float64Array(2)) {
 }
 
 // Freeze exports
+Object.freeze(Vector);
 Object.freeze(dot);
 Object.freeze(dot2);
 Object.freeze(dot3);
@@ -243,7 +256,7 @@ Object.freeze(fract4);
 Object.freeze(toPolar2);
 
 // Export
-export {dot, dot2, dot3, dot4, cross3, add, add2, add3, add4}
+export {Vector, dot, dot2, dot3, dot4, cross3, add, add2, add3, add4}
 export {sub, sub2, sub3, sub4, mag, mag2, mag3, mag4}
 export {scale, scale2, scale3, scale4, normalize, normalize2, normalize3, normalize4}
 export {angle, angle2, angle3, angle4, fract, fract2, fract3, fract4, toPolar2}
